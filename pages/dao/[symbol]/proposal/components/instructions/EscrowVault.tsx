@@ -23,8 +23,6 @@ const EscrowVaultContract = ({ index, governance }: { index: number; governance:
 	const connection = useWalletStore((s) => s.connection)
 	const wallet = useWalletStore((s) => s.current)
 
-	console.log(realmInfo?.realmId)
-	console.log(governance?.account)
 	const { governedMultiTypeAccounts } = useGovernedMultiTypeAccounts()
 	const shouldBeGoverned = index !== 0 && governance
 	const [form, setForm] = useState<VaultForm>({
@@ -72,7 +70,6 @@ const EscrowVaultContract = ({ index, governance }: { index: number; governance:
 				}
 			}),
 	})
-
 	return (
 		<>
 			<div className="space-y-4">

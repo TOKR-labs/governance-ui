@@ -106,8 +106,8 @@ const New = (props) => {
 			setIsLoadingSignedProposal(true)
 		}
 
-		const { isValid, validationErrors }: formValidation = await isFormValid(schema, form)
 
+		const { isValid, validationErrors }: formValidation = await isFormValid(schema, form)
 		const instructions: UiInstruction[] = await handleGetInstructions()
 		let proposalAddress: PublicKey | null = null
 		if (!realm) {
@@ -217,23 +217,22 @@ const New = (props) => {
 								<div className="space-y-4">
 
 
-									<div className="xpb-4 hidden">
-										<Input
-											label="Property Name"
-											placeholder="Name"
-											value={form.title}
-											id="name"
-											name="name"
-											type="hidden"
-											error={formErrors['title']}
-											onChange={(evt) => {
-												handleSetForm({
-													value: evt.target.value,
-													propertyName: 'title',
-												})
-											}}
-										/>
-									</div>
+									<Input
+										label="Title"
+										placeholder="Title"
+										value={form.title}
+										id="name"
+										name="name"
+										type="text"
+										error={formErrors['title']}
+										// error={propertyDataErrors['name']}
+										onChange={(evt) => {
+											handleSetForm({
+												value: evt.target.value,
+												propertyName: 'title',
+											})
+										}}
+									/>
 
 									<div className="xpb-4 hidden">
 										<Textarea
