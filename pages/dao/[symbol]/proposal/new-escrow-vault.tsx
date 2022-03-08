@@ -25,6 +25,7 @@ import useVoteStakeRegistryClientStore from 'VoteStakeRegistry/stores/voteStakeR
 import VoteBySwitch from './components/VoteBySwitch'
 import TokrizeContract from './components/instructions/Tokrize'
 import { useLayoutEffect } from 'react'
+import EscrowVaultContract from './components/instructions/EscrowVault'
 
 const schema = yup.object().shape({
 	title: yup.string().required('Title is required'),
@@ -144,7 +145,7 @@ const New = (props) => {
 					throw new Error('There is no suitable governing token for the proposal')
 				}
 
-				proposalAddress = await createProposal(rpcContext, realm, selectedGovernance.pubkey, ownTokenRecord.pubkey, form.title, form.description, proposalMint, selectedGovernance?.account?.proposalCount, instructionsData, isDraft, client)
+				proposalAddress = await createProposal(rpcContext, realm, selectedGovernance.pubkey, ownTokenRecord.pubkey, form!.title!, form!.description!, proposalMint, selectedGovernance?.account?.proposalCount, instructionsData, isDraft, client)
 
 				const url = fmtUrlWithCluster(`/dao/${symbol}/proposal/${proposalAddress}`)
 
@@ -277,7 +278,7 @@ const New = (props) => {
 									<h3 className="pt-8 hidden">
 										<span className="text-lg">rNFT Information</span>
 									</h3>
-									<TokrizeContract propertyDetails={propertyDetails} lookupUri={lookupUri} index={0} governance={governance} />
+									<EscrowVaultContract index={0} governance={governance!} />
 								</>
 							</NewProposalContext.Provider>
 							<div className="border-t border-fgd-4 flex justify-end mt-6 pt-6 space-x-4">

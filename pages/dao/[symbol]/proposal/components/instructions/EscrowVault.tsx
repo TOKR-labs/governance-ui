@@ -9,15 +9,15 @@ import Input from '@components/inputs/Input'
 import Textarea from '@components/inputs/Textarea'
 import { validateInstruction } from '@utils/instructionTools'
 import useRealm from '@hooks/useRealm'
-import { Base64InstructionForm, TokrizeForm, UiInstruction } from '@utils/uiTypes/proposalCreationTypes'
+import { Base64InstructionForm, TokrizeForm, UiInstruction, VaultForm } from '@utils/uiTypes/proposalCreationTypes'
 import useWalletStore from 'stores/useWalletStore'
 import * as borsh from 'borsh'
 import { NewProposalContext } from '../../new-escrow-vault'
 import GovernedAccountSelect from '../GovernedAccountSelect'
 import useGovernedMultiTypeAccounts from '@hooks/useGovernedMultiTypeAccounts'
-import { getTokrInstruction } from 'utils/tokrTools'
+import { getTokrInstruction, getVaultInstruction } from 'utils/tokrTools'
 
-const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { index: number; governance: ProgramAccount<Governance> | null; propertyDetails: any; lookupUri: any }) => {
+const EscrowVaultContract = ({ index, governance }: { index: number; governance: ProgramAccount<Governance> }) => {
 	const { realmInfo } = useRealm()
 	const programId: PublicKey | undefined = realmInfo?.programId
 	const connection = useWalletStore((s) => s.connection)
@@ -27,12 +27,9 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 	console.log(governance?.account)
 	const { governedMultiTypeAccounts } = useGovernedMultiTypeAccounts()
 	const shouldBeGoverned = index !== 0 && governance
-	const [form, setForm] = useState<TokrizeForm>({
+	const [form, setForm] = useState<VaultForm>({
 		governedAccount: undefined,
-		name: '',
-		symbol: '',
-		metaDataUri: '',
-		destinationAddress: '',
+		tokenAddress: '',
 	})
 	const [formErrors, setFormErrors] = useState({})
 	const { handleSetInstructions } = useContext(NewProposalContext)
@@ -41,7 +38,7 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 		setForm({ ...form, [propertyName]: value })
 	}
 	async function getInstruction(): Promise<UiInstruction> {
-		return getTokrInstruction({
+		return getVaultInstruction({
 			schema,
 			form,
 			programId,
@@ -54,16 +51,6 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 	useEffect(() => {
 		handleSetInstructions({ governedAccount: form.governedAccount?.governance, getInstruction }, index)
 	}, [form])
-
-	useEffect(() => {
-		setForm({
-			governedAccount: undefined,
-			name: propertyDetails?.name,
-			symbol: propertyDetails?.symbol || 'tokr_',
-			metaDataUri: lookupUri || '',
-			destinationAddress: '',
-		})
-	}, [propertyDetails])
 
 	const schema = yup.object().shape({
 		governedAccount: yup.object().nullable().required('Governed account is required'),
@@ -86,12 +73,6 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 			}),
 	})
 
-	useEffect(() => {
-		if (propertyDetails) {
-			console.log('propertyDetails!!!', propertyDetails)
-		}
-	}, [propertyDetails])
-
 	return (
 		<>
 			<div className="space-y-4">
@@ -107,62 +88,21 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 					governance={governance}
 				/>
 				<Input
-					label="Destination Address"
-					value={form.destinationAddress}
+					label="Token Address"
+					value={form.tokenAddress}
 					type="string"
 					onChange={(event) => {
 						handleSetForm({
 							value: event.target.value,
-							propertyName: 'destinationAddress',
+							propertyName: 'tokenAddress',
 						})
 					}}
 					step={1}
-					error={formErrors['destinationAddress']}
-				/>
-			</div>
-			<div className="hidden">
-				<Input
-					label="Name"
-					value={form.name}
-					type="hidden"
-					onChange={(event) => {
-						handleSetForm({
-							value: event.target.value,
-							propertyName: 'name',
-						})
-					}}
-					step={1}
-					error={formErrors['name']}
-				/>
-				<Input
-					label="Symbol"
-					value={form.symbol}
-					type="hidden"
-					onChange={(event) => {
-						handleSetForm({
-							value: event.target.value,
-							propertyName: 'symbol',
-						})
-					}}
-					step={1}
-					error={formErrors['symbol']}
-				/>
-				<Input
-					label="Metadata Uri"
-					value={form.metaDataUri}
-					type="hidden"
-					onChange={(event) => {
-						handleSetForm({
-							value: event.target.value,
-							propertyName: 'metaDataUri',
-						})
-					}}
-					step={1}
-					error={formErrors['metaDataUri']}
+					error={formErrors['tokenAddress']}
 				/>
 			</div>
 		</>
 	)
 }
 
-export default TokrizeContract
+export default EscrowVaultContract
