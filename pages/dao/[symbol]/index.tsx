@@ -138,6 +138,11 @@ const REALM = () => {
 										Tokrize
 									</NewProposalBtn>
 								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`escrow-vault`}>
+										Escrow Vault
+									</NewProposalBtn>
+								</div>
 
 								<ProposalFilter filters={filters} setFilters={setFilters} />
 							</div>
