@@ -9,7 +9,7 @@ import Input from '@components/inputs/Input'
 import Textarea from '@components/inputs/Textarea'
 import { validateInstruction } from '@utils/instructionTools'
 import useRealm from '@hooks/useRealm'
-import { Base64InstructionForm, TokrizeForm, UiInstruction, VaultForm } from '@utils/uiTypes/proposalCreationTypes'
+import { Base64InstructionForm, UiInstruction, VaultForm } from '@utils/uiTypes/proposalCreationTypes'
 import useWalletStore from 'stores/useWalletStore'
 import * as borsh from 'borsh'
 import { NewProposalContext } from '../../new-escrow-vault'
@@ -17,7 +17,7 @@ import GovernedAccountSelect from '../GovernedAccountSelect'
 import useGovernedMultiTypeAccounts from '@hooks/useGovernedMultiTypeAccounts'
 import { getTokrInstruction, getVaultInstruction } from 'utils/tokrTools'
 
-const EscrowVaultContract = ({ index, governance }: { index: number; governance: ProgramAccount<Governance> }) => {
+const EscrowVaultContract = ({ index, governance }: { index: number; governance: ProgramAccount<Governance> | null }) => {
 	const { realmInfo } = useRealm()
 	const programId: PublicKey | undefined = realmInfo?.programId
 	const connection = useWalletStore((s) => s.connection)

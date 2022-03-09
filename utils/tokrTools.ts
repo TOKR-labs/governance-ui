@@ -165,7 +165,7 @@ export async function getVaultInstruction({
 
     let prerequisiteInstructions: TransactionInstruction[] = []
 
-    console.log("Made it here")
+    // console.log("Made it here")
 
     const accountRent = await connection.current.getMinimumBalanceForRentExemption(AccountLayout.span);
 
@@ -177,7 +177,7 @@ export async function getVaultInstruction({
     console.log("Made it here2")
     const vault = Keypair.generate();
   
-    const vaultAuthority = await Vault.getPDA(vault.publicKey);
+    // const vaultAuthority = await Vault.getPDA(vault.publicKey);
 
     // const fractionMint = Keypair.generate();
     // const fractionMintTx = new metaplex.transactions.CreateMint(
@@ -220,7 +220,7 @@ export async function getVaultInstruction({
     // );
     // prerequisiteInstructions = prerequisiteInstructions.concat(fractionTreasuryTx.instructions)
     // // txBatch.addTransaction(fractionTreasuryTx);
-    // // txBatch.addSigner(fractionTreasury);
+    // txBatch.addSigner(fractionTreasury);
   
     const createTx = SystemProgram.createAccount({
         fromPubkey: wallet!.publicKey!,

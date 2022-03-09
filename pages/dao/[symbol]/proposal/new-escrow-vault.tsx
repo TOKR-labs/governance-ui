@@ -23,7 +23,6 @@ import { notify } from 'utils/notifications'
 import useVoteStakeRegistryClientStore from 'VoteStakeRegistry/stores/voteStakeRegistryClientStore'
 
 import VoteBySwitch from './components/VoteBySwitch'
-import TokrizeContract from './components/instructions/Tokrize'
 import { useLayoutEffect } from 'react'
 import EscrowVaultContract from './components/instructions/EscrowVault'
 
@@ -57,13 +56,10 @@ const New = (props) => {
 	const connection = useWalletStore((s) => s.connection)
 	const { fetchRealmGovernance, fetchTokenAccountsForSelectedRealmGovernances } = useWalletStore((s) => s.actions)
 	const [voteByCouncil, setVoteByCouncil] = useState(false)
-	const [title, setTitle] = useState<string>()
-	const [description, setDescription] = useState<string>()
-	const [lookupUri, setLookupUri] = useState<string>()
-	const [propertyDetails, setPropertyDetails] = useState<any>()
+
 	const [form, setForm] = useState({
-		title: title,
-		description: description,
+		title: '',
+		description: '',
 	})
 	const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
 	const [formErrors, setFormErrors] = useState({})
@@ -172,27 +168,6 @@ const New = (props) => {
 		fetchTokenAccountsForSelectedRealmGovernances()
 	}, [])
 
-	useEffect(() => {
-		if (title && description) {
-			setForm({
-				title: `Tokenize "${propertyDetails.name}" Proposal`,
-				description: `Proposal for minting the rNFT for ${propertyDetails.name}`,
-			})
-		}
-	}, [title, description])
-
-	useEffect(() => {
-		if (propertyDetails) {
-			console.log(propertyDetails, propertyDetails.name)
-
-			setTitle(`propertyDetails.name`)
-			setDescription(`Proposal for minting the rNFT for ${propertyDetails.name}`)
-			setForm({
-				title: propertyDetails.name,
-				description: `Proposal for minting the rNFT for ${propertyDetails.name}`,
-			})
-		}
-	}, [propertyDetails])
 
 	return (
 		<div>
@@ -225,7 +200,6 @@ const New = (props) => {
 										name="name"
 										type="text"
 										error={formErrors['title']}
-										// error={propertyDataErrors['name']}
 										onChange={(evt) => {
 											handleSetForm({
 												value: evt.target.value,
@@ -233,25 +207,6 @@ const New = (props) => {
 											})
 										}}
 									/>
-
-									<div className="xpb-4 hidden">
-										<Textarea
-											hidden
-											label="Description"
-											placeholder="Description"
-											value={form.description}
-											id="description"
-											name="description"
-											type="text"
-											error={formErrors['description']}
-											onChange={(evt) =>
-												handleSetForm({
-													value: evt.target.value,
-													propertyName: 'description',
-												})
-											}
-										/>
-									</div>
 								</div>
 							</div>
 						</div>
@@ -277,7 +232,7 @@ const New = (props) => {
 									<h3 className="pt-8 hidden">
 										<span className="text-lg">rNFT Information</span>
 									</h3>
-									<EscrowVaultContract index={0} governance={governance!} />
+									<EscrowVaultContract index={0} governance={governance} />
 								</>
 							</NewProposalContext.Provider>
 							<div className="border-t border-fgd-4 flex justify-end mt-6 pt-6 space-x-4">
