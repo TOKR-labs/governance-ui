@@ -23,8 +23,6 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 	const connection = useWalletStore((s) => s.connection)
 	const wallet = useWalletStore((s) => s.current)
 
-	console.log(realmInfo?.realmId)
-	console.log(governance?.account)
 	const { governedMultiTypeAccounts } = useGovernedMultiTypeAccounts()
 	const shouldBeGoverned = index !== 0 && governance
 	const [form, setForm] = useState<TokrizeForm>({
@@ -109,7 +107,12 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 				<Input
 					label="Destination Address"
 					value={form.destinationAddress}
-					type="string"
+					type="text"
+
+					className="field-validate"
+					required
+
+					placeholder="DAO Treasury Address"
 					onChange={(event) => {
 						handleSetForm({
 							value: event.target.value,

@@ -1,6 +1,6 @@
 import useWalletStore from 'stores/useWalletStore'
 import useRealm from 'hooks/useRealm'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import ProposalFilter from 'components/ProposalFilter'
 import ProposalCard from 'components/ProposalCard'
 import { Governance, ProgramAccount, Proposal, ProposalState } from '@solana/spl-governance'
@@ -15,8 +15,12 @@ import useGovernanceAssets from '@hooks/useGovernanceAssets'
 import useTreasuryAccountStore from 'stores/useTreasuryAccountStore'
 import { usePrevious } from '@hooks/usePrevious'
 import TokenBalanceCardWrapper from '@components/TokenBalance/TokenBalanceCardWrapper'
-import ApproveAllBtn from './proposal/components/ApproveAllBtn'
 import DepositLabel from '@components/TreasuryAccount/DepositLabel'
+import Loader from '@components/Loader'
+import { isSolanaBrowser } from '@utils/browserInfo'
+import useRouterHistory from '@hooks/useRouterHistory'
+import { buttonStyles } from '@components/Button'
+import { deconstructUri, encode } from '@utils/resolveUri'
 
 const compareProposals = (
 	p1: Proposal,
@@ -59,12 +63,15 @@ function getVotingStateRank(
 	}
 ) {
 	// Show proposals in Voting state before proposals in Finalizing state
-	const governance = governances[proposal.governance.toBase58()].account
+	const governance = governances[proposal.governance.toBase58()]?.account
 	return proposal.hasVoteTimeEnded(governance) ? 0 : 1
 }
 
 const REALM = () => {
-	const { realm, realmInfo, proposals, realmTokenAccount, ownTokenRecord, governances } = useRealm()
+	const [initalLoad, setInitalLoad] = useState<boolean>(true)
+	const { history } = useRouterHistory()
+
+	const { realm, realmInfo, proposals, realmTokenAccount, ownTokenRecord, governances, realmDisplayName, ownVoterWeight, toManyCommunityOutstandingProposalsForUser, toManyCouncilOutstandingProposalsForUse } = useRealm()
 	const { nftsGovernedTokenAccounts } = useGovernanceAssets()
 	const prevStringifyNftsGovernedTokenAccounts = usePrevious(JSON.stringify(nftsGovernedTokenAccounts))
 	const connection = useWalletStore((s) => s.connection.current)
@@ -73,8 +80,34 @@ const REALM = () => {
 	const [displayedProposals, setDisplayedProposals] = useState(Object.entries(proposals))
 	const [filteredProposals, setFilteredProposals] = useState(displayedProposals)
 	const wallet = useWalletStore((s) => s.current)
+	const [realmName, setRealmName] = useState()
 
 	const allProposals = Object.entries(proposals).sort((a, b) => compareProposals(b[1].account, a[1].account, governances))
+
+	const governanceItems = Object.values(governances)
+	const canCreateProposal = realm && governanceItems.some((g) => ownVoterWeight.canCreateProposal(g.account.config)) && !toManyCommunityOutstandingProposalsForUser && !toManyCouncilOutstandingProposalsForUse
+	const [canCreate, setCanCreate] = useState(canCreateProposal)
+
+	const [solanaBrowser, setSolanaBrowser] = useState<boolean>(false)
+	const connected = useWalletStore((s) => s.connected)
+
+	const [canCreateAction, setcanCreateAction] = useState(false)
+
+	useEffect(() => {
+		setcanCreateAction(governanceItems.some((g) => ownVoterWeight.canCreateProposal(g.account.config)))
+	}, [canCreateProposal, governanceItems, history])
+
+	useLayoutEffect(() => {
+		setSolanaBrowser(isSolanaBrowser())
+	}, [])
+
+	useLayoutEffect(() => {
+		if (!solanaBrowser) setCanCreate(false)
+	}, [solanaBrowser])
+
+	useEffect(() => {
+		setCanCreate(canCreateProposal)
+	}, [canCreateProposal])
 
 	useEffect(() => {
 		if (filters.length > 0) {
@@ -96,17 +129,87 @@ const REALM = () => {
 			getNfts(nftsGovernedTokenAccounts, connection)
 		}
 	}, [JSON.stringify(nftsGovernedTokenAccounts)])
+
 	// DEBUG print remove
-	console.log('governance page tokenAccount', realmTokenAccount && realmTokenAccount.publicKey.toBase58())
+	// console.log('governance page tokenAccount', realmTokenAccount && realmTokenAccount.publicKey.toBase58())
 
-	console.log('governance page wallet', wallet?.connected && wallet?.publicKey?.toBase58())
+	// console.log('governance page wallet', wallet?.connected && wallet?.publicKey?.toBase58())
 
-	console.log('governance page tokenRecord', wallet?.connected && ownTokenRecord)
+	// console.log('governance page tokenRecord', wallet?.connected && ownTokenRecord)
 
-	return (
+	const [tokrProposals, setTokrProposals] = useState<any>([])
+
+	const tokrProposalsTemp = async () =>
+		filteredProposals.filter((proposal) => {
+			const extendedProposalData = proposal[1].account.descriptionLink.charAt(0) === '{' ? JSON.parse(proposal[1].account.descriptionLink) : null
+			if (extendedProposalData) {
+				const tempObj = Object.assign(proposal[1].account, { meta: extendedProposalData })
+				const tempProposal = extendedProposalData && [proposal[0], tempObj, [extendedProposalData]]
+				return tempProposal
+			}
+		})
+
+	const start = async () => {
+		const getTokrProposals = await tokrProposalsTemp()
+		setTokrProposals(getTokrProposals)
+		if (realmName || realmDisplayName) setInitalLoad(false)
+	}
+
+	useLayoutEffect(() => {
+		if (filteredProposals?.length) {
+			start()
+		} else {
+			if (realmName || realmDisplayName) setInitalLoad(false)
+		}
+	}, [filteredProposals, realmName])
+
+	const [proposalType0, setProposalType0] = useState<any>([])
+	const [proposalType1, setProposalType1] = useState<any>([])
+	const [proposalType2, setProposalType2] = useState<any>([])
+	// const [proposalType3, setProposalType3] = useState<any>([])
+	// const [proposalType4, setProposalType4] = useState<any>([])
+
+	useEffect(() => {
+		console.log("proposalType1", proposalType1);
+	}, [proposalType1]);
+
+	useLayoutEffect(() => {
+		setProposalType0(
+			tokrProposals.filter((proposal) => {
+				if (proposal[1].account?.meta?.type === 0) return proposal
+			})
+		)
+
+		setProposalType1(
+			tokrProposals.filter((proposal) => {
+				if (proposal[1].account?.meta?.type === 1) return proposal
+			})
+		)
+		setProposalType2(
+			tokrProposals.filter((proposal) => {
+				if (proposal[1].account?.meta?.type === 2) return proposal
+			})
+		)
+
+		console.log("tokrProposals", tokrProposals);
+		// setProposalType3(
+		// 	tokrProposals.filter((proposal) => {
+		// 		if (proposal[1].account?.meta?.type === 3) return proposal
+		// 	})
+		// )
+		// setProposalType4(
+		// 	tokrProposals.filter((proposal) => {
+		// 		if (proposal[1].account?.meta?.type === 4) return proposal
+		// 	})
+		// )
+	}, [tokrProposals])
+
+	return initalLoad ? (
+		<Loader />
+	) : (
 		<>
 			<div>
-				<RealmHeader />
+				<RealmHeader getRealmDisplayName={(name) => setRealmName(name)} />
 				<div className="grid grid-cols-12 gap-4">
 					<div className="border border-fgd-1 bg-bkg-2 col-span-12 md:col-span-7 md:order-first lg:col-span-8 order-last pt-10 pb-8 px-8">
 						{/* <div>
@@ -124,19 +227,87 @@ const REALM = () => {
 							</>
 						) : null}
 					</div> */}
-						<div className="flex items-center justify-between pb-3">
-							<h4 className="text-fgd-2">{`${filteredProposals.length} proposals`}</h4>
-							<div className="flex items-center">
-								<div className="mr-4">
-									<ApproveAllBtn />
+
+						{proposalType1.length > 0 || proposalType2.length > 0 ? (
+							<>
+								<div className={`space-y-16${canCreate ? ' mt-16' : ''}`}>
+									{proposalType1.length > 0 && (
+										<div>
+											<div>
+												<div className="flex items-center justify-between">
+													<h2 className="text-2xl uppercase">{`Purchase Real Estate Proposal${proposalType1.length > 0 ? 's' : ''}`}</h2>
+													{canCreate && (
+														<div className="flex-shrink-0">
+															<NewProposalBtn string={`property=true`} addIcon title="Propose Another Property">
+																Propose Another Property
+															</NewProposalBtn>
+														</div>
+													)}
+												</div>
+												<div className="-mt-px-children">
+													{proposalType1.map(([k, v]) => {
+														return <ProposalCard cta={<NewProposalBtn linkClasses={`inline-flex text-xs py-1 px-2 ${buttonStyles}`} basic string={`uri=${ v.account?.meta?.uri ? encode(deconstructUri(v.account?.meta?.uri)) : ''}`} hideIcon children="Request Certification" />} key={k} proposalPk={new PublicKey(k)} proposal={v.account} />
+													})}
+												</div>
+											</div>
+										</div>
+									)}
+									{proposalType2.length > 0 && (
+										<div>
+											<h2 className="text-2xl uppercase">{`Request Tokr DAO to mint rNFT Proposal${proposalType2.length > 0 ? 's' : ''}`}</h2>
+											<div className="-mt-px-children">
+												{proposalType2.map(([k, v]) => {
+													return <ProposalCard cta={<NewProposalBtn linkClasses={`inline-flex text-xs py-1 px-2 ${buttonStyles}`} basic string={`uri=${ v.account?.meta?.uri ? encode(deconstructUri(v.account?.meta?.uri)) : ''}`} hideIcon children="Tokrize" type={`tokrize`} />} key={k} proposalPk={new PublicKey(k)} proposal={v.account} />
+												})}
+											</div>
+										</div>
+									)}
 								</div>
-								<div className="mr-4">
-									<NewProposalBtn />
+							</>
+						) : (
+							<div className="pb-4">
+								{realmDisplayName} has no proposals
+								{canCreate ? (
+									<>
+										{` `}get started by{' '}
+										<NewProposalBtn string={`property=true`} basic className={`underline`}>
+											submitting your first property
+										</NewProposalBtn>
+										!{' '}
+									</>
+								) : (
+									<>.</>
+								)}
+							</div>
+						)}
+
+						{canCreate && proposalType1.length === 0 && (
+							<NewProposalBtn string={`property=true`} hideIcon basic linkClasses={`text-center text-lg px-4 py-2 inline-flex ${buttonStyles}`}>
+								{proposalType1.length > 0 ? 'Propose Another Property' : 'Propose Your First Property'}
+							</NewProposalBtn>
+						)}
+
+						{(proposalType0?.length === 0 && !solanaBrowser) || (proposalType0?.length === 0 && !canCreateAction) ? (
+							<></>
+						) : (
+							<div className="mt-16">
+								<div className="flex items-center justify-between">
+									<h2 className="text-2xl uppercase">{`General DAO Proposals`}</h2>
+									{canCreate && (
+										<div className="flex-shrink-0">
+											<NewProposalBtn string={`type=0`} addIcon title="Create a General Proposal">
+												Create a General Proposal
+											</NewProposalBtn>
+										</div>
+									)}
 								</div>
-								<div className="mr-4">
-									<NewProposalBtn type={`tokrize`}>
-										Tokrize
-									</NewProposalBtn>
+
+								<p className="pb-4">General proposals for the {realmDisplayName} DAO to discuss and vote.</p>
+
+								<div className="-mt-px-children">
+									{proposalType0.map(([k, v]) => {
+										return <ProposalCard key={k} proposalPk={new PublicKey(k)} proposal={v.account} />
+									})}
 								</div>
 								<div className="mr-4">
 									<NewProposalBtn type={`escrow-vault`}>
@@ -144,17 +315,27 @@ const REALM = () => {
 									</NewProposalBtn>
 								</div>
 
-								<ProposalFilter filters={filters} setFilters={setFilters} />
+								{solanaBrowser && connected && proposalType0?.length === 0 && (
+									<NewProposalBtn string={`type=0`} hideIcon basic linkClasses={`text-center text-lg px-4 py-2 inline-flex ${buttonStyles}`}>
+										Create a General Proposal
+									</NewProposalBtn>
+								)}
 							</div>
-						</div>
-						<div className="space-y-3">{filteredProposals.length > 0 ? filteredProposals.map(([k, v]) => <ProposalCard key={k} proposalPk={new PublicKey(k)} proposal={v.account} />) : <div className="bg-bkg-3 px-4 md:px-6 py-4 text-center text-fgd-3">No proposals found</div>}</div>
+						)}
 					</div>
-					<div className="col-span-12 md:col-span-5 lg:col-span-4 space-y-4 border border-fgd-1">
-						<TokenBalanceCardWrapper />
-						<NFTSCompactWrapper></NFTSCompactWrapper>
-						<AccountsCompactWrapper />
-						{!realm?.account.config.useCommunityVoterWeightAddin && <MembersCompactWrapper></MembersCompactWrapper>}
-						<AssetsCompactWrapper></AssetsCompactWrapper>
+					<div className="col-span-12 md:col-span-5 lg:col-span-4 border border-green">
+						<div>
+							{/* <TokenBalanceCardWrapper /> */}
+							<div>
+								<NFTSCompactWrapper />
+							</div>
+							<div className="py-4">
+								<AccountsCompactWrapper />
+							</div>
+							<div>{!realm?.account.config.useCommunityVoterWeightAddin && <MembersCompactWrapper></MembersCompactWrapper>}</div>
+
+							{/* <AssetsCompactWrapper></AssetsCompactWrapper> */}
+						</div>
 					</div>
 				</div>
 			</div>

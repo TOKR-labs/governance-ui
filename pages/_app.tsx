@@ -19,6 +19,13 @@ import { WalletIdentityProvider } from '@cardinal/namespaces-components'
 import useVoteStakeRegistryClientStore from 'VoteStakeRegistry/stores/voteStakeRegistryClientStore'
 import useMarketStore from 'Strategies/store/marketStore'
 import handleGovernanceAssetsStore from '@hooks/handleGovernanceAssetsStore'
+import { isPhantomBrowser, isSolanaBrowser, web3 } from '@utils/browserInfo'
+
+declare global {
+    interface Window {
+        solana:any;
+    }
+}
 
 function App({ Component, pageProps }) {
 	useHydrateStore()
@@ -39,18 +46,28 @@ function App({ Component, pageProps }) {
 
 	const [pathName, setPathName] = useState('/');
 	const [showNav, setShowNav] = useState(true);
-	useLayoutEffect(() => {
-		console.log('pathName', pathName)
-		console.log('showNav', showNav)
-	}, [pathName])
+
 
 	useLayoutEffect(() => {
 		setShowNav((getPathName() === '/' || getPathName() === undefined) ? false : true)
 		setPathName(getPathName())
-
-		console.log("\n\n\n\n\n\n\n\n\n\ngetPathName", getPathName())
-		console.log("getPathName", getPathName())
 	}, [history])
+
+
+	const [solanaBrowser, setSolanaBrowser] = useState<boolean>(false);
+	const [phantomBrowser, setPhantomBrowser] = useState<boolean>(false);
+
+	const globalProps = {
+		isSolanaBrowser: solanaBrowser,
+		isPhantomBrowser: phantomBrowser,
+		web3: ((solanaBrowser || phantomBrowser) ? true: false),
+		...pageProps
+	}
+
+	useLayoutEffect(() => {
+		setSolanaBrowser(isSolanaBrowser());
+		setPhantomBrowser(isPhantomBrowser());
+	}, [])
 
 
 	// Note: ?v==${Date.now()} is added to the url to force favicon refresh.
@@ -80,6 +97,7 @@ function App({ Component, pageProps }) {
 				<title>{title}</title>
 				<link rel="preconnect" href="https://fonts.gstatic.com" />
 				<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=PT+Mono&display=swap" rel="stylesheet" />
+				<meta name="theme-color" content="#282828" />
 
 				{faviconUrl && <link rel="icon" href={faviconUrl} />}
 
@@ -103,10 +121,10 @@ function App({ Component, pageProps }) {
 			<ErrorBoundary>
 				<ThemeProvider defaultTheme="Mango">
 					<WalletIdentityProvider appName={'Realms'}>
-						{showNav && <NavBar />}
+						{showNav && <NavBar {...globalProps} />}
 						{showNav && <Notifications />}
 						<PageBodyContainer>
-							<Component {...pageProps} />
+							<Component {...globalProps} />
 						</PageBodyContainer>
 					</WalletIdentityProvider>
 				</ThemeProvider>

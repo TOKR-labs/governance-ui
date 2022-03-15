@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import Button from '../Button'
 import Input from '../inputs/Input'
 import useWalletStore from '../../stores/useWalletStore'
@@ -11,89 +11,66 @@ import Tooltip from '@components/Tooltip'
 import { getProgramVersionForRealm } from '@models/registry/api'
 import useVoteStakeRegistryClientStore from 'VoteStakeRegistry/stores/voteStakeRegistryClientStore'
 
-const DiscussionForm = () => {
-  const [comment, setComment] = useState('')
-  const connected = useWalletStore((s) => s.connected)
-  const { ownVoterWeight, realmInfo, realm } = useRealm()
-  const client = useVoteStakeRegistryClientStore((s) => s.state.client)
-  const [submitting, setSubmitting] = useState(false)
+const DiscussionForm = (props) => {
+	const [comment, setComment] = useState('')
+	const connected = useWalletStore((s) => s.connected)
+	const { ownVoterWeight, realmInfo, realm } = useRealm()
+	const client = useVoteStakeRegistryClientStore((s) => s.state.client)
+	const [submitting, setSubmitting] = useState(false)
 
-  const wallet = useWalletStore((s) => s.current)
-  const connection = useWalletStore((s) => s.connection)
-  const { proposal } = useWalletStore((s) => s.selectedProposal)
-  const { fetchChatMessages } = useWalletStore((s) => s.actions)
+	const wallet = useWalletStore((s) => s.current)
+	const connection = useWalletStore((s) => s.connection)
+	const { proposal } = useWalletStore((s) => s.selectedProposal)
+	const { fetchChatMessages } = useWalletStore((s) => s.actions)
+	const [canCreateAction, setCanCreateAction] = useState(props.canCreateAction || false)
 
-  const submitComment = async () => {
-    setSubmitting(true)
+	useLayoutEffect(() => {
+		if (props.canCreateAction) setCanCreateAction(props.canCreateAction);
+	}, [props.canCreateAction]);
 
-    const rpcContext = new RpcContext(
-      proposal!.owner,
-      getProgramVersionForRealm(realmInfo!),
-      wallet!,
-      connection.current,
-      connection.endpoint
-    )
+	const submitComment = async () => {
+		setSubmitting(true)
 
-    const msg = new ChatMessageBody({
-      type: ChatMessageBodyType.Text,
-      value: comment,
-    })
+		const rpcContext = new RpcContext(proposal!.owner, getProgramVersionForRealm(realmInfo!), wallet!, connection.current, connection.endpoint)
 
-    try {
-      await postChatMessage(
-        rpcContext,
-        realm!,
-        proposal!,
-        ownVoterWeight.getTokenRecord(),
-        msg,
-        undefined,
-        client
-      )
+		const msg = new ChatMessageBody({
+			type: ChatMessageBodyType.Text,
+			value: comment,
+		})
 
-      setComment('')
-    } catch (ex) {
-      console.error("Can't post chat message", ex)
-      //TODO: How do we present transaction errors to users? Just the notification?
-    } finally {
-      setSubmitting(false)
-    }
+		try {
+			await postChatMessage(rpcContext, realm!, proposal!, ownVoterWeight.getTokenRecord(), msg, undefined, client)
 
-    fetchChatMessages(proposal!.pubkey)
-  }
+			setComment('')
+		} catch (ex) {
+			console.error("Can't post chat message", ex)
+			//TODO: How do we present transaction errors to users? Just the notification?
+		} finally {
+			setSubmitting(false)
+		}
 
-  const postEnabled =
-    proposal && connected && ownVoterWeight.hasAnyWeight() && comment
+		fetchChatMessages(proposal!.pubkey)
+	}
 
-  const tooltipContent = !connected
-    ? 'Connect your wallet to send a comment'
-    : !ownVoterWeight.hasAnyWeight()
-    ? 'You need to have deposited some tokens to submit your comment.'
-    : !comment
-    ? 'Write a comment to submit'
-    : ''
+	const postEnabled = proposal && connected && ownVoterWeight.hasAnyWeight() && comment
 
-  return (
-    <>
-      <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
-        <Input
-          value={comment}
-          type="text"
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Thoughts?..."
-        />
+	const tooltipContent = !connected ? 'Connect your wallet to send a comment' : !ownVoterWeight.hasAnyWeight() ? 'You need to have deposited some tokens to submit your comment.' : !comment ? 'Write a comment to submit' : ''
 
-        <Tooltip contentClassName="flex-shrink-0" content={tooltipContent}>
-          <Button
-            className="flex-shrink-0"
-            onClick={() => submitComment()}
-            disabled={!postEnabled || !comment}
-          >
-            {submitting ? <Loading /> : <span>Send It</span>}
-          </Button>
-        </Tooltip>
-      </div>
-    </>
-  )
+	return props.solanaBrowser ? (
+		<>
+			{ canCreateAction && <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
+				<Input value={comment} type="text" onChange={(e) => setComment(e.target.value)} placeholder="Thoughts?..." />
+
+				<Tooltip contentClassName="flex-shrink-0" content={tooltipContent}>
+					<Button className="flex-shrink-0" onClick={() => submitComment()} disabled={!postEnabled || !comment}>
+						{submitting ? <Loading /> : <span>Comment</span>}
+					</Button>
+				</Tooltip>
+			</div>}
+		</>
+	) : (
+		<></>
+	)
 }
 
 export default DiscussionForm

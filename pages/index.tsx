@@ -14,7 +14,7 @@ const NavOption = (props) => {
 					{props.children}
 				</NavButton>
 			</li>
-		</> 
+		</>
 	)
 }
 
@@ -83,8 +83,11 @@ const Index = () => {
 								{connected && (
 									<>
 										<li className="pt-8">
-											<NavButton selectionkey="ENTER" href={fmtUrlWithCluster('/realms')}>
-												Browse DOAs
+											<NavButton selectionkey="ENTER" onClick={(e) => {
+												router.push(fmtUrlWithCluster(`/realms`))
+												e.preventDefault();
+											}}>
+												Browse DAOs
 											</NavButton>
 										</li>
 										<li className="pb-4">
@@ -92,7 +95,7 @@ const Index = () => {
 												selectionkey={`&nbsp;&nbsp;N&nbsp;&nbsp;`}
 												onClick={ handleCreateRealmButtonClick }
 											>
-												Create DOA
+												Create DAO
 											</NavButton>
 										</li>
 									</>
@@ -113,7 +116,10 @@ const Index = () => {
 							</>
 						) : (
 							<>
-								<NavOption selectionkey={2} href={fmtUrlWithCluster('/realms')}>
+								<NavOption selectionkey={2} href={fmtUrlWithCluster('/realms')} onClick={(e) => {
+									router.push(fmtUrlWithCluster(`/realms`))
+									e.preventDefault();
+								}}>
 									Browse DAOs
 								</NavOption>
 								<NavOption selectionkey={3} href="https://github.com" target="_blank">

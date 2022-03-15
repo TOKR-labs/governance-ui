@@ -22,7 +22,7 @@ function getProposalStateStyle(state: ProposalState) {
     state === ProposalState.Executing ||
     state === ProposalState.SigningOff
   ) {
-    return 'border border-blue text-blue'
+    return 'border border-white text-white'
   } else if (
     state === ProposalState.Completed ||
     state === ProposalState.Succeeded
@@ -33,62 +33,38 @@ function getProposalStateStyle(state: ProposalState) {
     state === ProposalState.Defeated ||
     state === ProposalState.ExecutingWithErrors
   ) {
-    return 'border border-red text-red'
+    return 'border border-wite text-white'
   } else {
     return 'border border-fgd-3 text-fgd-3'
   }
 }
 
-const ProposalStateBadge = ({
-  proposalPk,
-  proposal,
-  open,
-}: {
-  proposalPk: PublicKey
-  proposal: Proposal
-  open: boolean
-}) => {
-  const governance = useRealmGovernance(proposal.governance)
+const ProposalStateBadge = ({ proposalPk, proposal, open, cta }: { proposalPk: PublicKey; proposal: Proposal; open: boolean; cta?: any | undefined }) => {
+	const governance = useRealmGovernance(proposal.governance)
 
-  const ownVoteRecord = useWalletStore((s) => s.ownVoteRecordsByProposal)[
-    proposalPk.toBase58()
-  ]
+	const ownVoteRecord = useWalletStore((s) => s.ownVoteRecordsByProposal)[proposalPk.toBase58()]
 
-  let statusLabel = getProposalStateLabel(
-    proposal.state,
-    governance && proposal.getTimeToVoteEnd(governance) < 0
-  )
+	let statusLabel = getProposalStateLabel(proposal.state, governance && proposal.getTimeToVoteEnd(governance) < 0)
 
-  if (ownVoteRecord) {
-    statusLabel =
-      statusLabel + ': ' + (isYesVote(ownVoteRecord.account) ? 'Yes' : 'No')
-  }
+	if (ownVoteRecord) {
+		statusLabel = statusLabel + ': ' + (isYesVote(ownVoteRecord.account) ? 'Yes' : 'No')
+	}
 
-  return (
-    <>
-      {open ? (
-        <>
-          <div className="flex items-center justify-end gap-4">
-            <div
-              className={`${getProposalStateStyle(
-                proposal.state
-              )} inline-block px-2 py-1 text-xs`}
-            >
-              {statusLabel}
-            </div>
-          </div>
-        </>
-      ) : (
-        <div
-          className={`${getProposalStateStyle(
-            proposal.state
-          )} inline-block px-2 py-1 text-xs`}
-        >
-          {statusLabel}
-        </div>
-      )}
-    </>
-  )
+	return (
+		<>
+			{open ? (
+				<>
+					<div className="flex items-center justify-end gap-4">
+						<div className={`${getProposalStateStyle(proposal.state)} inline-block px-2 py-1 text-xs`}>{statusLabel}</div>
+					</div>
+				</>
+			) : ( <div className="flex flex-col space-y-4">
+					{ (statusLabel !=='Succeeded: Yes' && cta) && <div className={`${getProposalStateStyle(proposal.state)} inline-block px-2 py-1 text-xs`}>{statusLabel}</div> }
+					{ ((statusLabel ==='Succeeded: Yes') && cta) && cta }
+				</div>
+			)}
+		</>
+	)
 }
 
 export default ProposalStateBadge
