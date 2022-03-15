@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstruction } from '@solana/web3.js'
+import { Keypair, PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstruction } from '@solana/web3.js'
 import { serializeInstructionToBase64 } from '@solana/spl-governance'
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token'
+import { AccountLayout, MintLayout, NATIVE_MINT } from '@solana/spl-token';
+import { InitVault, Vault, VaultProgram } from '@metaplex-foundation/mpl-token-vault';
+import * as metaplex from '@metaplex/js';
 import { WalletAdapter } from '@solana/wallet-adapter-base'
 import type { ConnectionContext } from 'utils/connection'
 import * as borsh from 'borsh'
@@ -56,8 +59,7 @@ const TokrizeSchema = new Map([
  * Say hello
  * TODO integrate into
  */
-
-export async function getTokrInstruction({
+ export async function getTokrInstruction({
     schema,
     form,
     programId,
@@ -140,6 +142,121 @@ export async function getTokrInstruction({
     }
     return obj
 }
+
+
+export async function getVaultInstruction({
+    schema,
+    form,
+    programId,
+    connection,
+    wallet,
+    currentAccount,
+    setFormErrors
+    }: {
+    schema: any
+    form: any
+    programId: PublicKey | undefined
+    connection: ConnectionContext
+    wallet: WalletAdapter | undefined
+    currentAccount: GovernedTokenAccount | undefined
+    setFormErrors: any
+    }): Promise<UiInstruction> {
+    const isValid =  true; // todo: await validateInstruction({ schema, form, setFormErrors })
+
+    let prerequisiteInstructions: TransactionInstruction[] = []
+
+    // console.log("Made it here")
+
+    const accountRent = await connection.current.getMinimumBalanceForRentExemption(AccountLayout.span);
+
+    console.log("Made it here1")
+    const mintRent = await connection.current.getMinimumBalanceForRentExemption(MintLayout.span);
+  
+    const vaultRent = await connection.current.getMinimumBalanceForRentExemption(Vault.MAX_VAULT_SIZE);
+  
+    console.log("Made it here2")
+    const vault = Keypair.generate();
+  
+    // const vaultAuthority = await Vault.getPDA(vault.publicKey);
+
+    // const fractionMint = Keypair.generate();
+    // const fractionMintTx = new metaplex.transactions.CreateMint(
+    //   { feePayer: wallet!.publicKey },
+    //   {
+    //     newAccountPubkey: fractionMint.publicKey,
+    //     lamports: mintRent,
+    //     owner: vaultAuthority,
+    //     freezeAuthority: vaultAuthority,
+    //   },
+    // );
+    // prerequisiteInstructions = prerequisiteInstructions.concat(fractionMintTx.instructions)
+    // // txBatch.addTransaction(fractionMintTx);
+    // // txBatch.addSigner(fractionMint);
+  
+    // const redeemTreasury = Keypair.generate();
+    // const redeemTreasuryTx = new metaplex.transactions.CreateTokenAccount(
+    //   { feePayer: wallet!.publicKey },
+    //   {
+    //     newAccountPubkey: redeemTreasury.publicKey,
+    //     lamports: accountRent,
+    //     mint: NATIVE_MINT,
+    //     owner: vaultAuthority,
+    //   },
+    // );
+    // prerequisiteInstructions = prerequisiteInstructions.concat(redeemTreasuryTx.instructions)
+    // // redeemTreasuryTx.instructions
+    // // txBatch.addTransaction(redeemTreasuryTx);
+    // // txBatch.addSigner(redeemTreasury);
+    // console.log("HEre again1")
+    // const fractionTreasury = Keypair.generate();
+    // const fractionTreasuryTx = new metaplex.transactions.CreateTokenAccount(
+    //   { feePayer: wallet!.publicKey },
+    //   {
+    //     newAccountPubkey: fractionTreasury.publicKey,
+    //     lamports: accountRent,
+    //     mint: fractionMint.publicKey,
+    //     owner: vaultAuthority,
+    //   },
+    // );
+    // prerequisiteInstructions = prerequisiteInstructions.concat(fractionTreasuryTx.instructions)
+    // // txBatch.addTransaction(fractionTreasuryTx);
+    // txBatch.addSigner(fractionTreasury);
+  
+    const createTx = SystemProgram.createAccount({
+        fromPubkey: wallet!.publicKey!,
+        newAccountPubkey: vault.publicKey,
+        lamports: vaultRent,
+        space: Vault.MAX_VAULT_SIZE,
+        programId: VaultProgram.PUBKEY,
+      });
+    // // txBatch.addTransaction(uninitializedVaultTx);
+    // // txBatch.addSigner(vault);
+    // prerequisiteInstructions.push(createTx);
+  
+    // const initVaultTx = new InitVault(
+    //   { feePayer: wallet!.publicKey },
+    //   {
+    //     vault: vault.publicKey,
+    //     vaultAuthority: wallet!.publicKey!,
+    //     fractionalTreasury: fractionTreasury.publicKey,
+    //     pricingLookupAddress: new PublicKey("CFJhMHKp2HbzQ9bjniWbWD8oiLyZxsAX5ciaDUUXNRbU"), //todo actually create
+    //     redeemTreasury: redeemTreasury.publicKey,
+    //     fractionalMint: fractionMint.publicKey,
+    //     allowFurtherShareCreation: true,
+    //   },
+    // );
+
+
+    const obj: UiInstruction = {
+        serializedInstruction: serializeInstructionToBase64(createTx),
+        isValid,
+        governance: currentAccount?.governance,
+        prerequisiteInstructions: prerequisiteInstructions,
+    }
+    console.log("HEre again")
+    return obj
+}
+
 
 // todo try to find better seed and do not use the wallet either.
 export const getMintPda = async function (wallet: PublicKey, seed: String) {

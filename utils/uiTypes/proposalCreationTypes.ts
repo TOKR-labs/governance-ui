@@ -104,6 +104,12 @@ export interface TokrizeForm {
   metaDataUri: string
   destinationAddress: string
 }
+
+export interface VaultForm {
+  governedAccount: GovernedTokenAccount | undefined
+  tokenAddress: string
+}
+
 export interface EmptyInstructionForm {
   governedAccount: GovernedMultiTypeAccount | undefined
 }
