@@ -15,7 +15,7 @@ import * as borsh from 'borsh'
 import { NewProposalContext } from '../../new-tokrize'
 import GovernedAccountSelect from '../GovernedAccountSelect'
 import useGovernedMultiTypeAccounts from '@hooks/useGovernedMultiTypeAccounts'
-import { getTokrInstruction } from 'utils/tokrTools'
+import { getMintrNFTInstruction } from 'utils/tokrTools'
 
 const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { index: number; governance: ProgramAccount<Governance> | null; propertyDetails: any; lookupUri: any }) => {
 	const { realmInfo } = useRealm()
@@ -39,7 +39,7 @@ const TokrizeContract = ({ index, governance, propertyDetails, lookupUri }: { in
 		setForm({ ...form, [propertyName]: value })
 	}
 	async function getInstruction(): Promise<UiInstruction> {
-		return getTokrInstruction({
+		return getMintrNFTInstruction({
 			schema,
 			form,
 			programId,

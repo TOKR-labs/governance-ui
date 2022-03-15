@@ -16,6 +16,8 @@ import { UiInstruction } from './uiTypes/proposalCreationTypes'
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
 
+const TOKEN_VAULT_PROGRAM_ID = new PublicKey("vau1zxA2LbssAUEF7Gpw91zMM1LvXrvpzJtmZ58rPsn")
+
 const TOKR_PROGRAM = new PublicKey('9e78qsrsE2e5Q97T1biobry8mSot8NorEDJHJnMa5CpN')
 
 export class TokrizeArgs {
@@ -53,13 +55,36 @@ const TokrizeSchema = new Map([
 	],
 ])
 
+export class VaultArgs {
+    instruction = 1;
+    vault_bump: number;
+    vault_seed: string;
+    constructor(fields: { vault_bump: number, vault_seed: string } | undefined = undefined) {
+      if (fields) {
+        this.vault_bump = fields.vault_bump;
+        this.vault_seed = fields.vault_seed;
+      }
+    }
+  }
+  
+  const VaultSchema = new Map([
+    [VaultArgs, {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['vault_bump', 'u8'],
+        ['vault_seed', 'string']
+      ]
+    }],
+  ]);
+
 /**
  *
  *
  * Say hello
  * TODO integrate into
  */
- export async function getTokrInstruction({
+ export async function getMintrNFTInstruction({
     schema,
     form,
     programId,
@@ -163,97 +188,66 @@ export async function getVaultInstruction({
     }): Promise<UiInstruction> {
     const isValid =  true; // todo: await validateInstruction({ schema, form, setFormErrors })
 
-    let prerequisiteInstructions: TransactionInstruction[] = []
+    let vaultSeed = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
 
-    // console.log("Made it here")
-
-    const accountRent = await connection.current.getMinimumBalanceForRentExemption(AccountLayout.span);
-
-    console.log("Made it here1")
-    const mintRent = await connection.current.getMinimumBalanceForRentExemption(MintLayout.span);
+    const [vaultKey, vaultBump] = (await PublicKey.findProgramAddress([wallet!.publicKey!.toBuffer(), TOKEN_VAULT_PROGRAM_ID.toBuffer(), Buffer.from(vaultSeed)], TOKR_PROGRAM))
   
-    const vaultRent = await connection.current.getMinimumBalanceForRentExemption(Vault.MAX_VAULT_SIZE);
+    // console.log("Vault Seed: ", vaultSeed);
+    // console.log("Vault Bump: ", vaultBump);
   
-    console.log("Made it here2")
-    const vault = Keypair.generate();
+    const data = Buffer.from(borsh.serialize(
+      VaultSchema,
+      new VaultArgs({ vault_bump: vaultBump, vault_seed: vaultSeed })
+    ));
   
-    // const vaultAuthority = await Vault.getPDA(vault.publicKey);
-
-    // const fractionMint = Keypair.generate();
-    // const fractionMintTx = new metaplex.transactions.CreateMint(
-    //   { feePayer: wallet!.publicKey },
-    //   {
-    //     newAccountPubkey: fractionMint.publicKey,
-    //     lamports: mintRent,
-    //     owner: vaultAuthority,
-    //     freezeAuthority: vaultAuthority,
-    //   },
-    // );
-    // prerequisiteInstructions = prerequisiteInstructions.concat(fractionMintTx.instructions)
-    // // txBatch.addTransaction(fractionMintTx);
-    // // txBatch.addSigner(fractionMint);
+    console.log("MAX RENT:" + await connection.current.getMinimumBalanceForRentExemption(Vault.MAX_VAULT_SIZE));
   
-    // const redeemTreasury = Keypair.generate();
-    // const redeemTreasuryTx = new metaplex.transactions.CreateTokenAccount(
-    //   { feePayer: wallet!.publicKey },
-    //   {
-    //     newAccountPubkey: redeemTreasury.publicKey,
-    //     lamports: accountRent,
-    //     mint: NATIVE_MINT,
-    //     owner: vaultAuthority,
-    //   },
-    // );
-    // prerequisiteInstructions = prerequisiteInstructions.concat(redeemTreasuryTx.instructions)
-    // // redeemTreasuryTx.instructions
-    // // txBatch.addTransaction(redeemTreasuryTx);
-    // // txBatch.addSigner(redeemTreasury);
-    // console.log("HEre again1")
-    // const fractionTreasury = Keypair.generate();
-    // const fractionTreasuryTx = new metaplex.transactions.CreateTokenAccount(
-    //   { feePayer: wallet!.publicKey },
-    //   {
-    //     newAccountPubkey: fractionTreasury.publicKey,
-    //     lamports: accountRent,
-    //     mint: fractionMint.publicKey,
-    //     owner: vaultAuthority,
-    //   },
-    // );
-    // prerequisiteInstructions = prerequisiteInstructions.concat(fractionTreasuryTx.instructions)
-    // // txBatch.addTransaction(fractionTreasuryTx);
-    // txBatch.addSigner(fractionTreasury);
+    const vaultAuthority = await Vault.getPDA(vaultKey);
   
-    const createTx = SystemProgram.createAccount({
-        fromPubkey: wallet!.publicKey!,
-        newAccountPubkey: vault.publicKey,
-        lamports: vaultRent,
-        space: Vault.MAX_VAULT_SIZE,
-        programId: VaultProgram.PUBKEY,
-      });
-    // // txBatch.addTransaction(uninitializedVaultTx);
-    // // txBatch.addSigner(vault);
-    // prerequisiteInstructions.push(createTx);
+    const externalPricingAccountKey = (await PublicKey.findProgramAddress([Buffer.from("external"), vaultKey.toBuffer(), wallet!.publicKey!.toBuffer()], TOKR_PROGRAM))[0]
   
-    // const initVaultTx = new InitVault(
-    //   { feePayer: wallet!.publicKey },
-    //   {
-    //     vault: vault.publicKey,
-    //     vaultAuthority: wallet!.publicKey!,
-    //     fractionalTreasury: fractionTreasury.publicKey,
-    //     pricingLookupAddress: new PublicKey("CFJhMHKp2HbzQ9bjniWbWD8oiLyZxsAX5ciaDUUXNRbU"), //todo actually create
-    //     redeemTreasury: redeemTreasury.publicKey,
-    //     fractionalMint: fractionMint.publicKey,
-    //     allowFurtherShareCreation: true,
-    //   },
-    // );
-
+    const fractionMintkey = (await PublicKey.findProgramAddress([Buffer.from("fraction"), vaultKey.toBuffer(), wallet!.publicKey!.toBuffer()], TOKR_PROGRAM))[0]
+  
+    const redeemTreasuryKey = (await PublicKey.findProgramAddress([vaultAuthority.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), NATIVE_MINT.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID))[0]
+  
+    const fractionTreasuryKey = (await PublicKey.findProgramAddress([vaultAuthority.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), fractionMintkey.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID))[0]
+  
+    // console.log("vaultKey:", vaultKey.toBase58());
+    // console.log("vaultAuthority:", vaultAuthority.toBase58());
+    // console.log("externalPricingAccountKey:", externalPricingAccountKey.toBase58());
+    // console.log("fractionMintkey:", fractionMintkey.toBase58());
+    // console.log("redeemTreasuryKey:", redeemTreasuryKey.toBase58());
+    // console.log("fractionTreasuryKey:", fractionTreasuryKey.toBase58());
+  
+  
+    const instruction = new TransactionInstruction(
+      {
+        keys: [
+          { pubkey: wallet!.publicKey!, isSigner: true, isWritable: true },
+          { pubkey: vaultKey, isSigner: false, isWritable: true },
+          { pubkey: vaultAuthority, isSigner: false, isWritable: true },
+          { pubkey: externalPricingAccountKey, isSigner: false, isWritable: true },
+          { pubkey: fractionMintkey, isSigner: false, isWritable: true },
+          { pubkey: redeemTreasuryKey, isSigner: false, isWritable: true },
+          { pubkey: fractionTreasuryKey, isSigner: false, isWritable: true },
+          { pubkey: TOKEN_VAULT_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+          { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
+          { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: NATIVE_MINT, isSigner: false, isWritable: false },
+        ],
+        programId: TOKR_PROGRAM,
+        data: data
+      }
+    );
 
     const obj: UiInstruction = {
-        serializedInstruction: serializeInstructionToBase64(createTx),
+        serializedInstruction: serializeInstructionToBase64(instruction),
         isValid,
         governance: currentAccount?.governance,
-        prerequisiteInstructions: prerequisiteInstructions,
+        prerequisiteInstructions: [],
     }
-    console.log("HEre again")
     return obj
 }
 

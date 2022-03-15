@@ -15,7 +15,7 @@ import * as borsh from 'borsh'
 import { NewProposalContext } from '../../new-escrow-vault'
 import GovernedAccountSelect from '../GovernedAccountSelect'
 import useGovernedMultiTypeAccounts from '@hooks/useGovernedMultiTypeAccounts'
-import { getTokrInstruction, getVaultInstruction } from 'utils/tokrTools'
+import { getMintrNFTInstruction, getVaultInstruction } from 'utils/tokrTools'
 
 const EscrowVaultContract = ({ index, governance }: { index: number; governance: ProgramAccount<Governance> | null }) => {
 	const { realmInfo } = useRealm()
@@ -83,19 +83,6 @@ const EscrowVaultContract = ({ index, governance }: { index: number; governance:
 					error={formErrors['governedAccount']}
 					shouldBeGoverned={shouldBeGoverned}
 					governance={governance}
-				/>
-				<Input
-					label="Token Address"
-					value={form.tokenAddress}
-					type="string"
-					onChange={(event) => {
-						handleSetForm({
-							value: event.target.value,
-							propertyName: 'tokenAddress',
-						})
-					}}
-					step={1}
-					error={formErrors['tokenAddress']}
 				/>
 			</div>
 		</>
