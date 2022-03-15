@@ -2,6 +2,8 @@ import { FunctionComponent } from 'react'
 import Loading from './Loading'
 import Tooltip from './Tooltip'
 
+export const buttonStyles = "border border-primary-light default-transition font-bold text-green text-sm hover:bg-green hover:text-dark focus:outline-none";
+
 interface ButtonProps {
 	className?: string
 	isLoading?: boolean
@@ -48,6 +50,13 @@ export const LinkButton: FunctionComponent<ButtonProps> = ({ children, onClick, 
 	);
 }
 
+export const ButtonLink: FunctionComponent<ButtonProps> = ({ children, onClick, disabled = false, className, hideDefaults, href, target, title, ...props }) => {
+	return (
+		<a href={href} title={title} target={target} onClick={onClick}  className={`${className} inline-flex justify-center items-center default-transition font-bold px-4 text-sm focus:outline-none ${disabled ? 'bg-bkg-4 cursor-not-allowed text-fgd-2' : 'bg-primary-light text-bkg-2 hover:bg-primary-dark'}`} {...props}>
+			{children}
+		</a>
+	)
+}
 
 export const NavButton = (props) => {
 
