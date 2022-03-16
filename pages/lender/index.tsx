@@ -3,6 +3,7 @@ import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { toDollars, toPercent, Percent, Dollars } from '@utils/formatters'
 import { ExternalLinkIcon } from '@heroicons/react/solid'
 import Loader from '@components/Loader'
+import Button, { SecondaryButton } from '@components/Button'
 
 
 const UiBox = props => {
@@ -44,7 +45,7 @@ const Index = () => {
 					</h1>
 					<div className="flex flex-wrap flex-col lg:flex-row">
 						<div className="flex-grow flex-shrink-0 flex || p-4">
-							<UiBox isUSD={true} amount={500} percent={5} title="USDC"/>
+							<UiBox isUSD={true} amount={500} percent={5} title="USDC" />
 						</div>
 						<div className="flex-grow flex-shrink-0 flex || p-4">
 							<a href="https://google.com" target="_blank" className="flex flex-grow hover:text-dark hover:bg-green relative">
@@ -56,9 +57,17 @@ const Index = () => {
 						</div>
 					</div>
 				</div>
-				<p className="text-center pt-8">
-					Lorem ipsum, dolor sit amet consectetur adipisicing elit. Magnam sint illum laborum nostrum soluta! Non est, quis et quisquam rerum quas! Voluptates ut est dolores. Ea nobis expedita deleniti praesentium.
-				</p>
+				<p className="text-center pt-8">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Magnam sint illum laborum nostrum soluta! Non est, quis et quisquam rerum quas! Voluptates ut est dolores. Ea nobis expedita deleniti praesentium.</p>
+				<div className="-m-2 pt-10">
+					<div className="flex flex-wrap flex-col lg:flex-row justify-center">
+						<div className="flex flex-grow max-w-xs justify-center p-2">
+							<Button className="flex-grow">Deposit</Button>
+						</div>
+						<div className="flex flex-grow  max-w-xs justify-center p-2">
+							<Button className="flex-grow">Borrow</Button>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	)
