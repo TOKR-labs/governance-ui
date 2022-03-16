@@ -10,7 +10,7 @@ const UiBox = props => {
 		<>
 			<div className="border border-green || space-y-4 p-4 lg:p-8 || flex items-center justify-start flex-col || flex-grow">
 				<h2>
-					<span className="text-6xl">rNFT</span>
+					<span className="text-6xl">{ props.title || "rNFT"}</span>
 				</h2>
 				<div className="text-4xl">
 					{ props.isUSD ? <Dollars removeEmptyCents={false}>{ props.amount }</Dollars> : props.amount }
@@ -39,9 +39,12 @@ const Index = () => {
 		<div className="w-full flex items-center justify-center py-16">
 			<div className="w-full">
 				<div className="-m-4">
+					<h1 className="text-center pb-8">
+						<span className="text-6xl">Borrow</span>
+					</h1>
 					<div className="flex flex-wrap flex-col lg:flex-row">
 						<div className="flex-grow flex-shrink-0 flex || p-4">
-							<UiBox isUSD={true} amount={500} percent={5} />
+							<UiBox isUSD={true} amount={500} percent={5} title="USDC"/>
 						</div>
 						<div className="flex-grow flex-shrink-0 flex || p-4">
 							<a href="https://google.com" target="_blank" className="flex flex-grow hover:text-dark hover:bg-green relative">
