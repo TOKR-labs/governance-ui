@@ -18,7 +18,7 @@ const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzj
 
 const TOKEN_VAULT_PROGRAM_ID = new PublicKey("vau1zxA2LbssAUEF7Gpw91zMM1LvXrvpzJtmZ58rPsn")
 
-const TOKR_PROGRAM = new PublicKey('9e78qsrsE2e5Q97T1biobry8mSot8NorEDJHJnMa5CpN')
+const TOKR_PROGRAM = new PublicKey('Gwhqz24L34S9YUFqHKuNYnNd2wyWBEDUyf1w2aa62ciR')
 
 export class TokrizeArgs {
 	instruction = 0
