@@ -168,6 +168,7 @@ const REALM = () => {
 	const [proposalType2, setProposalType2] = useState<any>([])
 	// const [proposalType3, setProposalType3] = useState<any>([])
 	// const [proposalType4, setProposalType4] = useState<any>([])
+	const [proposalTypeX, setProposalTypeX] = useState<any>([])
 
 	useEffect(() => {
 		console.log("proposalType1", proposalType1);
@@ -190,6 +191,8 @@ const REALM = () => {
 				if (proposal[1].account?.meta?.type === 2) return proposal
 			})
 		)
+		setProposalTypeX(filteredProposals)
+
 
 		console.log("tokrProposals", tokrProposals);
 		// setProposalType3(
@@ -322,6 +325,13 @@ const REALM = () => {
 								)}
 							</div>
 						)}
+						<hr />
+						fglkdfhjgkfd! <br  />
+						<div className="-mt-px-children">
+									{proposalTypeX.map(([k, v]) => {
+										return <ProposalCard key={k} proposalPk={new PublicKey(k)} proposal={v.account} />
+									})}
+								</div>
 					</div>
 					<div className="col-span-12 md:col-span-5 lg:col-span-4 border border-green">
 						<div>
