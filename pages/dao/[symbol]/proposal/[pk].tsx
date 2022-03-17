@@ -29,8 +29,10 @@ import { checkArDataKey, getArData, setArData } from '@hooks/useLocalStorage'
 import useWalletStore from 'stores/useWalletStore'
 import { useHasVoteTimeExpired } from '@hooks/useHasVoteTimeExpired'
 import { constructUri, decode, deconstructUri, encode } from '@utils/resolveUri'
+import router, { useRouter } from 'next/router'
 
 const Proposal = () => {
+	const router = useRouter();
 	const [initalLoad, setInitalLoad] = useState<boolean>(true)
 	const { fmtUrlWithCluster } = useQueryContext()
 	const { governance } = useWalletStore((s) => s.selectedProposal)
@@ -42,6 +44,14 @@ const Proposal = () => {
 	const [proposalType, setProposalType] = useState<Number>(0)
 	const { yesVoteProgress, yesVotesRequired } = useProposalVotes(proposal?.account)
 	const [propertyDetails, setPropertyDetails] = useState<any>()
+	const [intake, setIntake] = useState<boolean>(false);
+
+	useLayoutEffect(() => {
+		if (router.query?.initial) {
+			setIntake(true)
+		}
+	}, [router])
+
 
 	const showResults = proposal && proposal.account.state !== ProposalState.Cancelled && proposal.account.state !== ProposalState.Draft
 
@@ -102,14 +112,27 @@ const Proposal = () => {
 		}
 	}, [descriptionObj])
 
+	const [genericProposal, setGenericProposal] = useState<boolean>(false);
 	useLayoutEffect(() => {
 		const handleResolveDescription = async () => {
 			const description = await resolveProposalDescription(descriptionLink)
 			setDescription(description)
+
+			if (!intake) {
+				setInitalLoad(false);
+				setGenericProposal(true);
+			}
 		}
 		if (descriptionLink) {
 			handleResolveDescription()
-			if (descriptionLink.charAt(0) === '{') setDescriptionObj([JSON.parse(descriptionLink)])
+			if (descriptionLink.charAt(0) === '{') {
+				setDescriptionObj([JSON.parse(descriptionLink)])
+			} else {
+				if (!intake) {
+					setInitalLoad(false);
+					setGenericProposal(true);
+				}
+			}
 		}
 	}, [descriptionLink])
 
@@ -140,35 +163,42 @@ const Proposal = () => {
 
 	useInterval(
 		() => {
-			setInitalLoad(true)
-			if (propertyDetails && typeof propertyDetails === 'object' && propertyDetails?.name) {
+			if (genericProposal) {
 				setPolling(false)
 				setInitalLoad(false)
+				return false;
 			} else {
-				setPollingCount(pollingCount + 1)
 
-				if (descriptionObj && descriptionObj[0].uri) {
-					getDataObj(true)
-						.then((res) => {
-							setPropertyDetails(res);
-							setPolling(false);
-							setInitalLoad(false);
-							return res
-						})
-						.then((res) => {
-							return res
-						})
-						.catch((error) => {
-							const msg = `Something went wrong. \Please verify the format of the data in ${descriptionObj && descriptionObj[0].uri} or refresh the page.`
-							if (pollingCount === 10) {
-								alert(msg)
-							} else {
-								console.log(`Attempt [${pollingCount}]` + msg)
-							}
-							setPolling(false)
-							setInitalLoad(false)
-							console.log('error', error)
-						})
+				setInitalLoad(true)
+				if (propertyDetails && typeof propertyDetails === 'object' && propertyDetails?.name) {
+					setPolling(false)
+					setInitalLoad(false)
+				} else {
+					setPollingCount(pollingCount + 1)
+
+					if (descriptionObj && descriptionObj[0].uri) {
+						getDataObj(true)
+							.then((res) => {
+								setPropertyDetails(res);
+								setPolling(false);
+								setInitalLoad(false);
+								return res
+							})
+							.then((res) => {
+								return res
+							})
+							.catch((error) => {
+								const msg = `Something went wrong. \Please verify the format of the data in ${descriptionObj && descriptionObj[0].uri} or refresh the page.`
+								if (pollingCount === 10) {
+									alert(msg)
+								} else {
+									console.log(`Attempt [${pollingCount}]` + msg)
+								}
+								setPolling(false)
+								setInitalLoad(false)
+								console.log('error', error)
+							})
+					}
 				}
 			}
 		},
@@ -215,26 +245,6 @@ const Proposal = () => {
 											<VotePanel simple className="" />
 										</div>
 									)}
-
-									{descriptionObj?.map((item, index) => {
-										return (
-											<div key={'descriptionOutput_' + index} className="relative bg-green text-dark">
-												<ul className="list-disc list-inside pl-8 pr-4 space-y-2 py-2 text-xs">
-													{item.uri && (
-														<li>
-															<span className="inline-flex align-center">
-																<a className="inline" href={item.uri} target="blank">
-																	<span className="flex items-start">
-																		Download <ExternalLinkIcon className="flex-shrink-0 h-3 ml-2 mt-0.5 text-dark w-3" />
-																	</span>
-																</a>
-															</span>
-														</li>
-													)}
-												</ul>
-											</div>
-										)
-									})}
 								</div>
 							) : (
 								<>
@@ -296,7 +306,7 @@ const Proposal = () => {
 							<div className="border border-green mt-4 py-4 md:py-6">
 								<div className="px-4 md:px-6">
 									{proposal?.account.state === ProposalState.Voting ? (
-										<div className="flex items-end justify-between pb-2 border-b border-green">
+										<div className="flex flex-col pb-2 border-b border-green">
 											<h3 className="mb-0">Voting Now</h3>
 											<ProposalTimeStatus proposal={proposal?.account} />
 										</div>
@@ -321,7 +331,7 @@ const Proposal = () => {
 					{canCreateAction && (
 						<>
 							<div className="border border-green p-4 md:p-6 -mt-px">
-								<VotePanel className={!isVoting === true ? 'text-center' : ''} isVoting={isVoting ? true : false} />
+								<VotePanel hideVote={true} className={!isVoting === true ? 'text-center' : ''} isVoting={isVoting ? true : false} />
 							</div>
 							<div className="hidden">
 								<ProposalActionsPanel />

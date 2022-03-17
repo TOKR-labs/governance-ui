@@ -1,78 +1,47 @@
+import useQueryContext from '@hooks/useQueryContext'
+import router, { useRouter } from 'next/router'
 import DiscordIcon from './DiscordIcon'
 import GithubIcon from './GithubIcon'
 import TwitterIcon from './TwitterIcon'
 
 const Footer = () => {
-  const { REALM } = process.env
+  const { REALM } = process.env;
+  const router = useRouter();
+  const { fmtUrlWithCluster } = useQueryContext();
 
-  if (REALM) return null
-  else
+//   if (REALM) return null
+//   else
     return (
-      <div className="flex flex-row h-20   justify-around bottom-0 bg-bkg-1 gap-y-8 md:gap-y-0 w-full absolute left-0  px-12 border-t border-primary-light">
-        <div className="flex justify-center  items-center gap-x-5   md:gap-x-6  ">
-          <a
-            rel="noreferrer"
-            href="https://docs.realms.today/"
-            target="_blank"
-            className="text-white text-base font-bold hover:text-primary-dark transition-all duration-200"
-          >
-            Docs
-          </a>
-          <div className=" justify-center  hidden md:flex  items-center gap-x-8 py-2 ">
-            <a
-              rel="noreferrer"
-              href="https://github.com/solana-labs/solana-program-library/blob/master/governance/README.md"
-              target="_blank"
-              className="text-white    text-base font-light hover:text-primary-dark transition-all duration-200"
-            >
-              Programs Github
-            </a>
-          </div>
-        </div>
-
-        <div className="flex justify-center items-center gap-x-10 sm:gap-x-20 md:gap-x-24">
-          <a
-            rel="noreferrer"
-            target="_blank"
-            href="https://twitter.com/solana"
-            className="text-primary-light text-base font-light transform transition duration-500 hover:scale-125 shadow-sm"
-          >
-            <TwitterIcon className="" />
-          </a>
-          <a
-            rel="noreferrer"
-            target="_blank"
-            href="https://github.com/solana-labs/governance-ui"
-            className="text-primary-light text-base font-light transform transition duration-500 hover:scale-125  shadow-sm"
-          >
-            <GithubIcon className="" />
-          </a>
-          <a
-            rel="noreferrer"
-            target="_blank"
-            href="https://discord.com/invite/VsPbrK2hJk"
-            className="text-primary-light text-base font-light transform transition duration-500 hover:scale-125 shadow-sm"
-          >
-            <DiscordIcon className="" />
-          </a>
-        </div>
-
-        <div className=" justify-center items-center gap-x-1   hidden md:flex ">
-          <p className="text-white text-base font-light cursor-default ">
-            Powered by
-          </p>
-
-          <a
-            rel="noreferrer"
-            href="https://solana.com/"
-            target="_blank"
-            className="text-white text-base font-bold hover:text-primary-dark transition-all duration-200"
-          >
-            Solana
-          </a>
-        </div>
-      </div>
-    )
+		<div className="border-t py-6 border-green overflow-hidden">
+			<div className="-my-2 -mx-6">
+				<ul className="flex justify-center flex-wrap">
+					<li className="py-2 px-6 flex-shrink-0">
+						<a href="/realms" onClick={() => router.push(fmtUrlWithCluster(`/realms`))}>
+							<span className="whitespace-nowrap">[ Browse DAOs ]</span>
+						</a>
+					</li>
+					<li className="py-2 px-6 flex-shrink-0">
+						<a href="/realms" target="_blank">
+							<span className="whitespace-nowrap">[ Read docs ]</span>
+						</a>
+					</li>
+					<li className="py-2 px-6 flex-shrink-0">
+						<a href="/realms" target="_blank">
+							<span className="whitespace-nowrap">[ White paper ]</span>
+						</a>
+					</li>
+					<li className="py-2 px-6 flex-shrink-0">
+						<a href="https://twitter.com/tokrfi" target="_blank">
+							<span className="whitespace-nowrap">[ Twitter ]</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div className="container mx-auto text-xs my-6">
+				<p className="text-legal text-justify">The Current Owner, Tokr DAO, and any Tokr affiliates or contributors to the open source software and systems involved in the Tokr Protocol and the minting of this rNFT hereby disclaim any representation or warranty relating to the sufficiency or adequacy of the title to the real estate owned by the entity specified in the rNFT metadata, and, by purchasing this rNFT, you hereby acknowledge that you are not relying on any such representations or warranties. Linked in the metadata is a copy of the Owner's Title Insurance Policy that was obtained at the time of acquisition (or subsequently as amended in the metadata, if applicable). The metadata and documentation submitted as part of rNFT certification and verification process is intended to make data collection easier to assist you in conducting your own due diligence. It is strongly encouraged that you conduct your own research and additional due diligence as it relates to the sufficiency and adequacy of the title to such real estate prior to acquiring this rNFT, which may include obtaining a title insurance policy. Any validations or certifications made by the Current Owner or Tokr DAO and any affiliates or contributors relating to the rNFT do not relate to the title of such real estate.</p>
+			</div>
+		</div>
+	)
 }
 
 export default Footer
