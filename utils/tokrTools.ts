@@ -5,7 +5,7 @@ import { Keypair, PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstr
 import { serializeInstructionToBase64 } from '@solana/spl-governance'
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token'
 import { AccountLayout, MintLayout, NATIVE_MINT } from '@solana/spl-token';
-import { InitVault, Vault, VaultProgram, SafetyDepositBox } from '@metaplex-foundation/mpl-token-vault';
+import { InitVault, Vault, VaultProgram, SafetyDepositBox, VaultState, WithdrawSharesFromTreasury } from '@metaplex-foundation/mpl-token-vault';
 import * as metaplex from '@metaplex/js';
 import { WalletAdapter } from '@solana/wallet-adapter-base'
 import type { ConnectionContext } from 'utils/connection'
@@ -341,6 +341,163 @@ export async function getAddTokenInstruction({
     return obj
 }
 
+/**
+ *
+ *
+ * Say hello
+ * TODO integrate into
+ */
+ export async function getFractionalizeInstruction({
+  schema,
+  form,
+  programId,
+  connection,
+  wallet,
+  currentAccount,
+  setFormErrors
+  }: {
+  schema: any
+  form: any
+  programId: PublicKey | undefined
+  connection: ConnectionContext
+  wallet: WalletAdapter | undefined
+  currentAccount: GovernedTokenAccount | undefined
+  setFormErrors: any
+  }): Promise<UiInstruction> {
+  const isValid =  true; // todo: await validateInstruction({ schema, form, setFormErrors })
+
+
+  const vaultMintAuthority = new PublicKey(form.vaultMintAuthority)
+  const vaultAddress = new PublicKey(form.vaultAddress)
+  const tokenStoreAddress = new PublicKey(form.tokenStoreAddress)
+
+  let serializedInstruction = ''
+  const prerequisiteInstructions: TransactionInstruction[] = []
+  
+  const vault = await metaplex.programs.vault.Vault.load(connection.current, vaultAddress);
+
+  if (vault.data.state == VaultState.Inactive) {
+    console.log("Vault is inactive, add activate instruction");
+    const txData1 = new metaplex.programs.vault.ActivateVault({feePayer: wallet!.publicKey!},
+      {    
+        vault: vault.pubkey,
+        fractionMint: new PublicKey(vault.data.fractionMint),
+        fractionMintAuthority: vaultMintAuthority,
+        fractionTreasury: new PublicKey(vault.data.fractionTreasury),
+        vaultAuthority: new PublicKey(vault.data.authority),
+        numberOfShares: form.numberOfShares
+      }
+    );
+    txData1.instructions.forEach(x => prerequisiteInstructions.push(x))
+    
+  }
+
+  // const safetyDepositBoxes = await vault.getSafetyDepositBoxes(connection);
+
+  const txData2 = new metaplex.programs.vault.MintFractionalShares({feePayer: wallet!.publicKey!},
+    {    
+      vault: vault.pubkey,
+      fractionMint: new PublicKey(vault.data.fractionMint),
+      fractionMintAuthority: vaultMintAuthority,
+      fractionTreasury: new PublicKey(vault.data.fractionTreasury),
+      store: tokenStoreAddress,
+      vaultAuthority: new PublicKey(vault.data.authority),
+      numberOfShares: form.numberOfShares
+    }
+  );
+  
+  
+  // serializedInstruction = serializeInstructionToBase64(txData2.instructions)
+
+  const obj: UiInstruction = {
+      serializedInstruction,
+      isValid,
+      governance: currentAccount?.governance,
+      prerequisiteInstructions: prerequisiteInstructions,
+  }
+  return obj
+}
+
+/**
+ *
+ *
+ * Say hello
+ * TODO integrate into
+ */
+ export async function getSendSharesInstruction({
+  schema,
+  form,
+  programId,
+  connection,
+  wallet,
+  currentAccount,
+  setFormErrors
+  }: {
+  schema: any
+  form: any
+  programId: PublicKey | undefined
+  connection: ConnectionContext
+  wallet: WalletAdapter | undefined
+  currentAccount: GovernedTokenAccount | undefined
+  setFormErrors: any
+  }): Promise<UiInstruction> {
+  const isValid =  true; // todo: await validateInstruction({ schema, form, setFormErrors })
+
+  const destination = new PublicKey(form.destination)
+  const vaultAddress = new PublicKey(form.vaultAddress)
+  const tokenAddress = new PublicKey(form.tokenAddress)
+
+  const prerequisiteInstructions: TransactionInstruction[] = []
+
+  const vault = await metaplex.programs.vault.Vault.load(connection.current, vaultAddress);
+
+  const destination_ata = await getAtaPda(
+      destination,
+      new PublicKey(vault.data.fractionMint),
+  );
+  
+  console.log("ATA address:", destination_ata.toBase58())
+  
+  const accountInfo = await connection.current.getAccountInfo(destination_ata);
+  
+  if (!accountInfo) {
+    console.log("Creating new ATA for destination");
+    prerequisiteInstructions.push(
+        createAssociatedTokenAccountInstruction(
+          destination_ata,
+          wallet!.publicKey!,
+          destination,
+          new PublicKey(vault.data.fractionMint),
+        ),
+    );
+  
+  }
+  
+
+  const transferAuthorityKey = (await PublicKey.findProgramAddress([Buffer.from("vault"), TOKEN_VAULT_PROGRAM_ID.toBuffer(), vaultAddress.toBuffer()], TOKEN_VAULT_PROGRAM_ID))[0]
+  const tokenStoreKey = (await PublicKey.findProgramAddress([Buffer.from("store"), vaultAddress.toBuffer(), tokenAddress.toBuffer()], TOKR_PROGRAM))[0]
+  
+  console.log("Transfer Authority: ", transferAuthorityKey.toBase58())
+  const withdrawTx = new WithdrawSharesFromTreasury({ feePayer: wallet!.publicKey! }, {
+    store: tokenStoreKey,
+    vault: vaultAddress,
+    destination: destination_ata,
+    fractionTreasury: new PublicKey(vault.data.fractionTreasury),
+    vaultAuthority: wallet!.publicKey!,
+    transferAuthority: transferAuthorityKey,
+    numberOfShares: form.numberOfShares
+  });
+
+  const obj: UiInstruction = {
+      serializedInstruction: serializeInstructionToBase64(withdrawTx.instructions[0]), //todo I hope this works
+      isValid,
+      governance: currentAccount?.governance,
+      prerequisiteInstructions: prerequisiteInstructions,
+  }
+  return obj
+}
+
+
 
 // todo try to find better seed and do not use the wallet either.
 export const getMintPda = async function (wallet: PublicKey, seed: String) {
@@ -353,4 +510,54 @@ export const getMetadataPda = async function (mint: PublicKey) {
 
 export const getAtaPda = async function (wallet: PublicKey, mint: PublicKey) {
 	return (await PublicKey.findProgramAddress([wallet.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID))[0]
+}
+
+function createAssociatedTokenAccountInstruction(
+  associatedTokenAddress: PublicKey,
+  payer: PublicKey,
+  walletAddress: PublicKey,
+  splTokenMintAddress: PublicKey,
+) {
+  const keys = [
+      {
+          pubkey: payer,
+          isSigner: true,
+          isWritable: true,
+      },
+      {
+          pubkey: associatedTokenAddress,
+          isSigner: false,
+          isWritable: true,
+      },
+      {
+          pubkey: walletAddress,
+          isSigner: false,
+          isWritable: false,
+      },
+      {
+          pubkey: splTokenMintAddress,
+          isSigner: false,
+          isWritable: false,
+      },
+      {
+          pubkey: SystemProgram.programId,
+          isSigner: false,
+          isWritable: false,
+      },
+      {
+          pubkey: TOKEN_PROGRAM_ID,
+          isSigner: false,
+          isWritable: false,
+      },
+      {
+          pubkey: SYSVAR_RENT_PUBKEY,
+          isSigner: false,
+          isWritable: false,
+      },
+  ];
+  return new TransactionInstruction({
+      keys,
+      programId: ASSOCIATED_TOKEN_PROGRAM_ID,
+      data: Buffer.from([]),
+  });
 }
