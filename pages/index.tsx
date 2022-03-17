@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import useWalletStore from 'stores/useWalletStore'
 import { NavButton } from '@components/Button'
@@ -50,8 +50,18 @@ const Index = () => {
 		router.push(fmtUrlWithCluster(`/realms/new`))
 	}
 
+	useLayoutEffect(() => {
+		document?.querySelector("html")?.classList.add('u-fs-4')
+	},[])
+
 	return (
-		<div>
+		<a
+			href="/realms"
+			onClick={() => {
+				router.push(fmtUrlWithCluster(`/realms`))
+			}}
+			className="flex w-full h-full items-center justify-center"
+		>
 			<div className="flex flex-col justify-center items-center min-h-screen">
 				<div className="pt-8 w-full flex flex-col items-center pb-8">
 					<div>************************************</div>
@@ -60,102 +70,19 @@ const Index = () => {
 					<div className="pb-4">Open Source Software</div>
 					<div>************************************</div>
 				</div>
-				<div className="py-8 w-full px-16">
-					<div className="py-2">Choose one of the following options:</div>
-					<ul className="">
-						<NavOption
-							selectionkey={1}
-							onClick={(e) => {
-								// alert("Connect my wallet :)");
-								setConnectingWallet(connectingWallet === false ? true : false)
-								e.preventDefault()
-							}}
-						>
-							Connect your wallet
-						</NavOption>
-
-						{connectingWallet ? (
-							<>
-								<li className="pt-4">Connect your wallet, make a selection below:</li>
-								<li>
-									<ConnectWalletSimple setSuccessfulConnect={setSuccessfulConnect} />
-								</li>
-								{connected && (
-									<>
-										<li className="pt-8">
-											<NavButton selectionkey="ENTER" onClick={(e) => {
-												router.push(fmtUrlWithCluster(`/realms`))
-												e.preventDefault();
-											}}>
-												Browse DAOs
-											</NavButton>
-										</li>
-										<li className="pb-4">
-											<NavButton
-												selectionkey={`&nbsp;&nbsp;N&nbsp;&nbsp;`}
-												onClick={ handleCreateRealmButtonClick }
-											>
-												Create DAO
-											</NavButton>
-										</li>
-									</>
-								)}
-								<li>
-									------------------------------------
-									<br />
-									<NavOption
-										selectionkey="ESC"
-										onClick={(e) => {
-											setConnectingWallet(false)
-											e.preventDefault()
-										}}
-									>
-										To Cancel
-									</NavOption>
-								</li>
-							</>
-						) : (
-							<>
-								<NavOption selectionkey={2} href={fmtUrlWithCluster('/realms')} onClick={(e) => {
-									router.push(fmtUrlWithCluster(`/realms`))
-									e.preventDefault();
-								}}>
-									Browse DAOs
-								</NavOption>
-								<NavOption selectionkey={3} href="https://github.com" target="_blank">
-									Read docs
-								</NavOption>
-								<NavOption selectionkey={4} href="https://rhove.com" target="_blank">
-									Download white paper
-								</NavOption>
-								<NavOption selectionkey={5} href="https://discord.com" target="_blank">
-									Join discord
-								</NavOption>
-							</>
-						)}
-					</ul>
+				<div className="pb-8">
+					<p>
+						A protocol for financing real world assets on the Solana blockchain
+					</p>
+				</div>
+				<div>
+					&lt; ENTER &gt;
 				</div>
 			</div>
-		</div>
+		</a>
 	)
 
 	return null
 }
 
 export default Index
-
-// import { useEffect } from 'react'
-// import { useRouter } from 'next/router'
-// const Index = () => {
-// 	const router = useRouter()
-
-// 	useEffect(() => {
-// 		const { REALM } = process.env
-// 		const mainUrl = REALM ? `/dao/${REALM}` : '/realms'
-// 		router.replace(mainUrl)
-// 	}, [])
-
-// 	return null
-// }
-
-// export default Index

@@ -128,7 +128,7 @@ export class VaultArgs {
 
     const data = Buffer.from(borsh.serialize(
         TokrizeSchema,
-        new TokrizeArgs({ 
+        new TokrizeArgs({
           name:  String(form.name),
           symbol: String(form.symbol),
           uri: String(form.metaDataUri),
@@ -136,7 +136,7 @@ export class VaultArgs {
           mint_bump: mintBump
         })
     ));
-    
+
 
     const instruction = new TransactionInstruction(
         {
