@@ -22,20 +22,20 @@ const nftCollateralSupply = new PublicKey('CrjC5ibJtJ3wCQFWV5bUbmJuRvGheYK6P57ur
 const nftLiquiditySupply = new PublicKey('EBj5vQpeBxdrBM31DQy5u2t15XHBsYF8vQorRQTETZbE')
 const nftLiquidityFeeReciever = new PublicKey('8B7h3B5BgDBjo1YGTN3XSY8YUGW6genyh1a8LSYvrQWu')
 const nftUserTransferAuthority = new PublicKey('Aps7svXcF6Z3XA3WSNYthLHSExet1iHH2AsmnrbgzPA6')
-const nftLendingMarketAuthority = new PublicKey('711KPeFZWwtogZm5vz3fKtBXvw6N9ipdm5KU1EAE3goN')
+const nftLendingMarketAuthority = new PublicKey('Ho4NCtMvP82sRGYwVVALAQUc4Rkxm8swRDLbjTTU8LWC')
 const nftOracle = new PublicKey('dYUUVtUTzqwbQFb9bxCwKt8FkGJb3FrrDm5ACWRZ4ho')
 
 // ONLY has 1 wsol. Hopefully we can borrow a small amount.
 //TODO: input vals for this reserve.
 // wSol Reserve
 
-const wSolAccount = new PublicKey('7o8CktbeYJemHWiBWC8md55HChpBZwwQBYZMeAfyaQh6')
+const wSolAccount = new PublicKey('rseYkWVT9LSSrjwCHHCTy548GS14LCvaEJuZowVACVv')
 const wSolReserve = new PublicKey('4XCbN8BnThuiwU9fzLmZLjWMVWKhDb5Erv8qrLGkyqrQ')
 const wSolCollateralMint = new PublicKey('6zV8dsA3EvYHQra9Qxvvy4t5ShC2G2rGwytep9i1mhUX')
 const wSolCollateralSupply = new PublicKey('AnbrNvSfbLQWML9RQJSbzAPGp4PqmKa1sNMiXHJe4uiP')
 const wSolLiquiditySupply = new PublicKey('FzGu3aGGGPpUJc5jiM7gpvq3w9JUkL16pMPpUTbj7Cr3')
 const wSolLiquidityFeeReciever = new PublicKey('6G38wPoBTGVLcXjTL7hNVe1d7oLxLkAgoj1a5awiL1df')
-const wSolUserTransferAuthority = new PublicKey('9rTtUhDdjh4zfqE8DF4pmvca7xCsvZ7CmJHJzurdeWeC')
+const wSolUserTransferAuthority = new PublicKey('Ho4NCtMvP82sRGYwVVALAQUc4Rkxm8swRDLbjTTU8LWC')
 // const wSolLendingMarketAuthority = new solanaWeb3.PublicKey('TBD');
 const wSolPythPrice = new PublicKey('J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix')
 
@@ -122,6 +122,20 @@ const createWSolCollateralATA = async () => {
 	// worked transaction: https://solscan.io/tx/5VwKjbrKoBv51JnPZ6Za5bwP8zdnYcb24NFex7gx1Eb5qeuAVQuMQTFvK32FHYApqatZhHdZVx7oUjpinopJ2MWM?cluster=devnet
 }
 
+export const createWSolCollateralATATransaction = async (userPublicKey) => {
+	// Sol deposit solend:  https://solscan.io/tx/5YVqDNA3mX2rYvk3mgy3Q8yvxL9puAd5fgBqwB5G1zwKAhghALepSs4Axp3NpQvzisP4s5GRQ49Prg6WcWrSYtmM
+
+	const userCollateralAccountAddress = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, wSolC, userPublicKey)
+
+	const createUserCollateralAccountIx = Token.createAssociatedTokenAccountInstruction(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, nftCollateralMint, userCollateralAccountAddress, userPublicKey, userPublicKey)
+
+	const tx = new Transaction().add(createUserCollateralAccountIx)
+
+	return tx
+
+	// worked transaction: https://solscan.io/tx/5VwKjbrKoBv51JnPZ6Za5bwP8zdnYcb24NFex7gx1Eb5qeuAVQuMQTFvK32FHYApqatZhHdZVx7oUjpinopJ2MWM?cluster=devnet
+}
+
 const depositNFTReserveLiquidity = async () => {
 	let tokenAmount = await connection.getTokenAccountBalance(nftAccount)
 
@@ -164,7 +178,7 @@ export const depositNFTReserveLiquidityTransaction = async (recentBlockhash, use
 
 	const refreshReserve = getRefreshReserveInstruction(nftReserve, nftOracle)
 	tx.add(refreshReserve)
-	// tx.add(throughLib)
+	tx.add(throughLib)
 
 	return tx
 }

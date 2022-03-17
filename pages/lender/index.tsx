@@ -87,7 +87,7 @@ const Index = () => {
 				<div className="-m-2 pt-10">
 					<div className="flex flex-wrap flex-col lg:flex-row justify-center">
 						<div className="flex flex-grow max-w-xs justify-center p-2">
-							<Button onClick={createNFTATA} className="flex-grow">
+							<Button onClick={deposit} className="flex-grow">
 								Deposit
 							</Button>
 						</div>
