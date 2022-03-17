@@ -1675,6 +1675,15 @@
     tweetnacl "^1.0.3"
     webpack-dev-server "^3.11.2"
 
+"@solana/spl-token-lending@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token-lending/-/spl-token-lending-0.3.6.tgz#df88587e2d8b65a5a1ff43b8f059b91ee168c411"
+  integrity sha512-T6o35YfN00UHtoVo3PK5yIVg6WZnHGZnyCfge8nQFPq/r9zW1Bcqg1XVv9Tz+bXEXgbihkW/p85KQQ29+Tjpng==
+  dependencies:
+    bigint-buffer "^1.1.5"
+    bignumber.js "^9.0.1"
+    buffer-layout "^1.2.1"
+
 "@solana/spl-token-registry@^0.2.1733":
   version "0.2.1733"
   resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.1733.tgz#b85b8f9c21a7143853f0fcbd1aac99740ba24eb3"
@@ -2864,6 +2873,13 @@ big.js@^6.1.1:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/big.js/-/big.js-6.1.1.tgz#63b35b19dc9775c94991ee5db7694880655d5537"
   integrity sha512-1vObw81a8ylZO5ePrtMay0n018TcftpTA5HFKDaSuiUDBo8biRBtjIobw60OpwuvrGk+FsxKamqN4cnmj/eXdg==
+
+bigint-buffer@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/bigint-buffer/-/bigint-buffer-1.1.5.tgz#d038f31c8e4534c1f8d0015209bf34b4fa6dd442"
+  integrity sha512-trfYco6AoZ+rKhKnxA0hgX0HAbVP/s808/EuDSe2JDzUnCp/xAsli35Orvk67UrTEcwuxZqYZDmfA2RXJgxVvA==
+  dependencies:
+    bindings "^1.3.0"
 
 bignumber.js@^9.0.1:
   version "9.0.1"
