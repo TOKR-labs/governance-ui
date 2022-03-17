@@ -12,10 +12,10 @@ import useRealm from '@hooks/useRealm'
 import { Base64InstructionForm, FractionalizeForm, SendShareForm, TokrizeForm, UiInstruction } from '@utils/uiTypes/proposalCreationTypes'
 import useWalletStore from 'stores/useWalletStore'
 import * as borsh from 'borsh'
-import { NewProposalContext } from '../../new-tokrize'
+import { NewProposalContext } from '../../new-send-share'
 import GovernedAccountSelect from '../GovernedAccountSelect'
 import useGovernedMultiTypeAccounts from '@hooks/useGovernedMultiTypeAccounts'
-import { getMintrNFTInstruction } from 'utils/tokrTools'
+import { getMintrNFTInstruction, getSendSharesInstruction } from 'utils/tokrTools'
 
 const SendSharesContract = ({ index, governance, propertyDetails = null, lookupUri = null}: { index: number; governance: ProgramAccount<Governance> | null; propertyDetails: any; lookupUri: any }) => {
 	const { realmInfo } = useRealm()
@@ -39,7 +39,7 @@ const SendSharesContract = ({ index, governance, propertyDetails = null, lookupU
 		setForm({ ...form, [propertyName]: value })
 	}
 	async function getInstruction(): Promise<UiInstruction> {
-		return getMintrNFTInstruction({
+		return getSendSharesInstruction({
 			schema,
 			form,
 			programId,
