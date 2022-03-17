@@ -21,12 +21,15 @@ import { ATA_PROGRAM_INSTRUCTIONS } from './programs/associatedTokenAccount'
 /**
  * Default governance program id instance
  */
-export const DEFAULT_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt'
-export const TOKR_DAO = '6oQgdREFwoabzyLZoF3UrwCRyKa1EHmZ1qihXezUbKAR'
+// export const DEFAULT_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt' // MAINNET+DEVNET (new)
+export const DEFAULT_GOVERNANCE_PROGRAM_ID = 'A46hUedKdttuKKU3bCA4c1pX47X7TjVGDUH7gJUhoPRZ' // scrappy DEVNET
 /**
  * Default TEST governance program id instance
  */
-export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt'
+// export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt' // MAINNET+DEVNET (new)
+export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'A46hUedKdttuKKU3bCA4c1pX47X7TjVGDUH7gJUhoPRZ' // scrappy DEVNET
+
+export const TOKR_DAO = 'ALkNW35wP58efK1k4xpaa9GdbZJSuFraBJqjjzNqoncr'
 
 // Well known account names displayed on the instruction card
 export const ACCOUNT_NAMES = {
