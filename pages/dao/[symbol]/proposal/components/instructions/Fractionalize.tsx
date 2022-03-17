@@ -9,17 +9,15 @@ import Input from '@components/inputs/Input'
 import Textarea from '@components/inputs/Textarea'
 import { validateInstruction } from '@utils/instructionTools'
 import useRealm from '@hooks/useRealm'
-import { AddTokenToVaultForm, Base64InstructionForm, UiInstruction, VaultForm } from '@utils/uiTypes/proposalCreationTypes'
+import { Base64InstructionForm, FractionalizeForm, TokrizeForm, UiInstruction } from '@utils/uiTypes/proposalCreationTypes'
 import useWalletStore from 'stores/useWalletStore'
 import * as borsh from 'borsh'
-import { NewProposalContext } from '../../new-add-token'
+import { NewProposalContext } from '../../new-fractionalize'
 import GovernedAccountSelect from '../GovernedAccountSelect'
 import useGovernedMultiTypeAccounts from '@hooks/useGovernedMultiTypeAccounts'
-import { getAddTokenInstruction } from 'utils/tokrTools'
+import { getFractionalizeInstruction, getMintrNFTInstruction } from 'utils/tokrTools'
 
-const AddTokenToVaultContract = ({ index, governance }: { index: number; governance: ProgramAccount<Governance> | null }) => {
-
-
+const FractionalizeContract = ({ index, governance, propertyDetails = null, lookupUri = null}: { index: number; governance: ProgramAccount<Governance> | null; propertyDetails: any; lookupUri: any }) => {
 	const { realmInfo } = useRealm()
 	const programId: PublicKey | undefined = realmInfo?.programId
 	const connection = useWalletStore((s) => s.connection)
@@ -27,23 +25,21 @@ const AddTokenToVaultContract = ({ index, governance }: { index: number; governa
 
 	const { governedMultiTypeAccounts } = useGovernedMultiTypeAccounts()
 	const shouldBeGoverned = index !== 0 && governance
-	const [form, setForm] = useState<AddTokenToVaultForm>({
+	const [form, setForm] = useState<FractionalizeForm>({
 		governedAccount: undefined,
-		tokenAddress: '',
-        vaultAddress: '',
-        fromAddress: ''
+		vaultAddress: '',
+		tokenStoreAddress: '',
+		vaultMintAuthority: '',
+		numberOfShares: 1
 	})
 	const [formErrors, setFormErrors] = useState({})
 	const { handleSetInstructions } = useContext(NewProposalContext)
 	const handleSetForm = ({ propertyName, value }) => {
-
 		setFormErrors({})
 		setForm({ ...form, [propertyName]: value })
 	}
-
 	async function getInstruction(): Promise<UiInstruction> {
-
-		return getAddTokenInstruction({
+		return getFractionalizeInstruction({
 			schema,
 			form,
 			programId,
@@ -54,9 +50,9 @@ const AddTokenToVaultContract = ({ index, governance }: { index: number; governa
 		})
 	}
 	useEffect(() => {
-
 		handleSetInstructions({ governedAccount: form.governedAccount?.governance, getInstruction }, index)
 	}, [form])
+
 
 	const schema = yup.object().shape({
 		governedAccount: yup.object().nullable().required('Governed account is required'),
@@ -78,6 +74,13 @@ const AddTokenToVaultContract = ({ index, governance }: { index: number; governa
 				}
 			}),
 	})
+
+	useEffect(() => {
+		if (propertyDetails) {
+			console.log('propertyDetails!!!', propertyDetails)
+		}
+	}, [propertyDetails])
+
 	return (
 		<>
 			<div className="space-y-4">
@@ -105,33 +108,46 @@ const AddTokenToVaultContract = ({ index, governance }: { index: number; governa
 					error={formErrors['vaultAddress']}
 				/>
                 <Input
-					label="From Address"
-					value={form.fromAddress}
+					label="Token Store Address"
+					value={form.tokenStoreAddress}
 					type="text"
 					onChange={(evt) =>
 					handleSetForm({
 						value: evt.target.value,
-						propertyName: 'fromAddress',
+						propertyName: 'tokenStoreAddress',
 					})
 					}
-					error={formErrors['fromAddress']}
+					error={formErrors['tokenStoreAddress']}
 				/>
 				<Input
-					label="Token Address"
-					value={form.tokenAddress}
+					label="Vault Mint Authority"
+					value={form.vaultMintAuthority}
 					type="text"
 					onChange={(evt) =>
 					handleSetForm({
 						value: evt.target.value,
-						propertyName: 'tokenAddress',
+						propertyName: 'vaultMintAuthority',
 					})
 					}
-					error={formErrors['tokenAddress']}
+					error={formErrors['vaultMintAuthority']}
 				/>
+
+				<Input
+					label="Number of Shares"
+					value={form.numberOfShares}
+					type="number"
+					onChange={(evt) =>
+					handleSetForm({
+						value: evt.target.value,
+						propertyName: 'numberOfShares',
+					})
+					}
+					error={formErrors['numberOfShares']}
+				/>		
 			</div>
-			
+
 		</>
 	)
 }
 
-export default AddTokenToVaultContract
+export default FractionalizeContract

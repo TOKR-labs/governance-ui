@@ -345,6 +345,16 @@ const REALM = () => {
 										Add Token To Vault
 									</NewProposalBtn>
 								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`fractionalize`}>
+										Fractionalize
+									</NewProposalBtn>
+								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`send-share`}>
+										Send Fractional Share
+									</NewProposalBtn>
+								</div>
 
 								{solanaBrowser && connected && proposalType0?.length === 0 && (
 									<NewProposalBtn string={`type=0`} hideIcon basic linkClasses={`text-center text-lg px-4 py-2 inline-flex ${buttonStyles}`}>
