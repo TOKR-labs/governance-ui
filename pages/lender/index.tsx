@@ -4,10 +4,11 @@ import { toDollars, toPercent, Percent, Dollars } from '@utils/formatters'
 import { ExternalLinkIcon } from '@heroicons/react/solid'
 import Loader from '@components/Loader'
 import Button, { SecondaryButton } from '@components/Button'
-import { depositNFTReserveLiquidityTransaction } from '../../scripts/lending'
+import { depositNFTReserveLiquidityTransaction, createNFTCollateralATATransaction } from '../../scripts/lending'
 import useWalletStore from '../../stores/useWalletStore'
 import { sendTransaction } from '@utils/send'
 import { sign } from 'crypto'
+import { Keypair, SystemProgram, Transaction } from '@solana/web3.js'
 
 const UiBox = (props) => {
 	return (
@@ -34,10 +35,24 @@ const Index = () => {
 	const connection = useWalletStore((s) => s.connection.current)
 	const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
 
+	const createNFTATA = async () => {
+		const blockhash = await connection.getRecentBlockhash()
+		const tx = await createNFTCollateralATATransaction(wallet?.publicKey)
+		const transaction = new Transaction().add(tx)
+		const signature = await sendTransaction({ transaction, wallet, connection })
+
+		await connection.confirmTransaction(signature, 'processed')
+	}
+
 	const deposit = async () => {
 		const blockhash = await connection.getRecentBlockhash()
 		const tx = await depositNFTReserveLiquidityTransaction(blockhash, wallet?.publicKey)
-		const signature = await sendTransaction({ tx, wallet, connection })
+		const string = wallet?.publicKey?.toBase58()
+		const transaction = new Transaction().add(tx)
+
+		const signature = await sendTransaction({ transaction, wallet, connection })
+
+		await connection.confirmTransaction(signature, 'processed')
 	}
 
 	useEffect(() => {
@@ -72,7 +87,7 @@ const Index = () => {
 				<div className="-m-2 pt-10">
 					<div className="flex flex-wrap flex-col lg:flex-row justify-center">
 						<div className="flex flex-grow max-w-xs justify-center p-2">
-							<Button onClick={deposit} className="flex-grow">
+							<Button onClick={createNFTATA} className="flex-grow">
 								Deposit
 							</Button>
 						</div>

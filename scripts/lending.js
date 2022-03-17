@@ -14,16 +14,16 @@ const seed = LENDING_MARKET_ID.slice(0, 32)
 
 const wrappedSolMint = new PublicKey('So11111111111111111111111111111111111111112')
 
-const nftAccount = new PublicKey('ASoDVv236dg1QNqGnYcrTVpiYRGRjiVZtvuAVK7N9jnN')
+const nftAccount = new PublicKey('7udK1kAxf4g7beokRgRepob1vjA4x3WvKEoXmbuskBci')
 // // NFT Reserve
-const nftReserve = new PublicKey('EqSL3pJahprDTetqMBZSjfLPAmvFGTTzu33urVBg6v5d')
-const nftCollateralMint = new PublicKey('9rv7bDg2pLHfeekT9bMGjohAEN69zJBPY8SbbrjTJ7ZE')
-const nftCollateralSupply = new PublicKey('ArfCMnvBPLj53xdWMeiEomo9FQniCiDcghxLCTWXoBCi')
-const nftLiquiditySupply = new PublicKey('JAt3ggZ4Fye8Ce4z7GfLcdScxwzWhyALTZ5VKpQeDV7k')
-const nftLiquidityFeeReciever = new PublicKey('Vnt54Jscbim2wFqGdHrHWfHMzqPK8Rrmh1q7paMdg7t')
-const nftUserTransferAuthority = new PublicKey('8o9iHavm8Z8ryLTptu62J7DU6Je2qx3kdVMcmAqwTisg')
+const nftReserve = new PublicKey('94KiV4S1G43Rch3Q6V1uKvPznjCoeZJnkhnWThkW35BE')
+const nftCollateralMint = new PublicKey('8Ark5uACoFGNzQVE4rrQuUXXNuQBSWpKtmmNRrQZBMF7')
+const nftCollateralSupply = new PublicKey('CrjC5ibJtJ3wCQFWV5bUbmJuRvGheYK6P57urbJhyfRe')
+const nftLiquiditySupply = new PublicKey('EBj5vQpeBxdrBM31DQy5u2t15XHBsYF8vQorRQTETZbE')
+const nftLiquidityFeeReciever = new PublicKey('8B7h3B5BgDBjo1YGTN3XSY8YUGW6genyh1a8LSYvrQWu')
+const nftUserTransferAuthority = new PublicKey('Aps7svXcF6Z3XA3WSNYthLHSExet1iHH2AsmnrbgzPA6')
 const nftLendingMarketAuthority = new PublicKey('711KPeFZWwtogZm5vz3fKtBXvw6N9ipdm5KU1EAE3goN')
-const nftPythPrice = new PublicKey('J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix')
+const nftOracle = new PublicKey('dYUUVtUTzqwbQFb9bxCwKt8FkGJb3FrrDm5ACWRZ4ho')
 
 // ONLY has 1 wsol. Hopefully we can borrow a small amount.
 //TODO: input vals for this reserve.
@@ -91,6 +91,20 @@ const createNFTCollateralATA = async () => {
 	// worked transaction: https://solscan.io/tx/5VwKjbrKoBv51JnPZ6Za5bwP8zdnYcb24NFex7gx1Eb5qeuAVQuMQTFvK32FHYApqatZhHdZVx7oUjpinopJ2MWM?cluster=devnet
 }
 
+export const createNFTCollateralATATransaction = async (userPublicKey) => {
+	// Sol deposit solend:  https://solscan.io/tx/5YVqDNA3mX2rYvk3mgy3Q8yvxL9puAd5fgBqwB5G1zwKAhghALepSs4Axp3NpQvzisP4s5GRQ49Prg6WcWrSYtmM
+
+	const userCollateralAccountAddress = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, nftCollateralMint, userPublicKey)
+
+	const createUserCollateralAccountIx = Token.createAssociatedTokenAccountInstruction(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, nftCollateralMint, userCollateralAccountAddress, userPublicKey, userPublicKey)
+
+	const tx = new Transaction().add(createUserCollateralAccountIx)
+
+	return tx
+
+	// worked transaction: https://solscan.io/tx/5VwKjbrKoBv51JnPZ6Za5bwP8zdnYcb24NFex7gx1Eb5qeuAVQuMQTFvK32FHYApqatZhHdZVx7oUjpinopJ2MWM?cluster=devnet
+}
+
 const createWSolCollateralATA = async () => {
 	// Sol deposit solend:  https://solscan.io/tx/5YVqDNA3mX2rYvk3mgy3Q8yvxL9puAd5fgBqwB5G1zwKAhghALepSs4Axp3NpQvzisP4s5GRQ49Prg6WcWrSYtmM
 
@@ -125,7 +139,7 @@ const depositNFTReserveLiquidity = async () => {
 		recentBlockhash: recentBlockhash.blockhash,
 		feePayer: user.publicKey,
 	})
-	const refreshReserve = getRefreshReserveInstruction(nftReserve, nftPythPrice)
+	const refreshReserve = getRefreshReserveInstruction(nftReserve, nftOracle)
 	console.log(refreshReserve)
 	tx.add(refreshReserve)
 	tx.add(throughLib)
@@ -136,13 +150,11 @@ const depositNFTReserveLiquidity = async () => {
 
 export const depositNFTReserveLiquidityTransaction = async (recentBlockhash, userPublicKey) => {
 	// const userNFTCollateralAccountAddress = await Token.getAssociatedTokenAddress(nftCollateralMint, userPublicKey, true, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
-
 	const userNFTCollateralAccountAddress = await Token.getAssociatedTokenAddress(ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, nftCollateralMint, userPublicKey)
 
 	const throughLib = tokenLending.depositReserveLiquidityInstruction(1, nftAccount, userNFTCollateralAccountAddress, nftReserve, nftLiquiditySupply, nftCollateralMint, new PublicKey(LENDING_MARKET_ID), nftLendingMarketAuthority, userPublicKey)
 
 	throughLib.programId = LENDING_PROGRAM_ID
-
 	// Alternatively, manually construct the transaction
 
 	let tx = new Transaction({
@@ -150,9 +162,9 @@ export const depositNFTReserveLiquidityTransaction = async (recentBlockhash, use
 		feePayer: userPublicKey,
 	})
 
-	const refreshReserve = getRefreshReserveInstruction(nftReserve, nftPythPrice)
+	const refreshReserve = getRefreshReserveInstruction(nftReserve, nftOracle)
 	tx.add(refreshReserve)
-	tx.add(throughLib)
+	// tx.add(throughLib)
 
 	return tx
 }
@@ -178,7 +190,7 @@ const depositNFTCollateral = async () => {
 		feePayer: user.publicKey,
 	})
 
-	const refreshReserve = getRefreshReserveInstruction(nftReserve, nftPythPrice)
+	const refreshReserve = getRefreshReserveInstruction(nftReserve, nftOracle)
 
 	tx.add(refreshReserve)
 	tx.add(approveTransaction)
@@ -477,6 +489,7 @@ const getRefreshReserveInstruction = (reserve, reserveLiquidityOracleAccount) =>
 	const keys = [
 		{ pubkey: reserve, isSigner: false, isWritable: true },
 		{ pubkey: reserveLiquidityOracleAccount, isSigner: false, isWritable: false },
+		{ pubkey: new PublicKey(LENDING_MARKET_ID), isSigner: false, isWritable: false },
 		{ pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false },
 	]
 
