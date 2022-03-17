@@ -110,6 +110,29 @@ export interface VaultForm {
   tokenAddress: string
 }
 
+export interface AddTokenToVaultForm {
+  governedAccount: GovernedTokenAccount | undefined
+  fromAddress: string
+  vaultAddress: string
+  tokenAddress: string
+}
+
+export interface FractionalizeForm {
+  governedAccount: GovernedTokenAccount | undefined
+  vaultAddress: string
+  tokenStoreAddress: string
+  vaultMintAuthority: string
+  numberOfShares: number
+}
+
+export interface SendShareForm {
+  governedAccount: GovernedTokenAccount | undefined
+  vaultAddress: string
+  destination: string
+  tokenAddress: string
+  numberOfShares: number
+}
+
 export interface EmptyInstructionForm {
   governedAccount: GovernedMultiTypeAccount | undefined
 }
