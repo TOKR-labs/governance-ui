@@ -390,8 +390,7 @@ const New = (props) => {
 			setProposalType(2)
 			setLiteMode(false)
 
-
-			const url = constructUri(router.query?.uri.toString(), true);
+			const url = constructUri(router.query?.uri.toString(), true)
 			if (_prepopulateForDemos !== true) {
 				fetch(url, {
 					method: 'GET',
@@ -453,21 +452,21 @@ const New = (props) => {
 		// } catch {
 		// 	// TODO: if fails store localstorage version for recovery....
 		// }
-		console.log("result", result);
+		console.log('result', result)
 
 		const metadataResultFile = result.messages?.find((m) => m.filename === 'manifest.json') || {
 			aws: true,
-			transactionId: result
-		};
+			transactionId: result,
+		}
 
-		console.log("metadataResultFile", metadataResultFile);
+		console.log('metadataResultFile', metadataResultFile)
 
 		setSubmittingStep([...submittingStep, `Data uploaded.`])
 		if (metadataResultFile?.transactionId) {
-			const link = metadataResultFile.aws? result : `https://arweave.net/${metadataResultFile.transactionId}`
+			const link = metadataResultFile.aws ? result : `https://arweave.net/${metadataResultFile.transactionId}`
 			setArWeaveLink(link)
 
-			console.log(link);
+			console.log(link)
 
 			return link
 		} else {
@@ -640,7 +639,7 @@ const New = (props) => {
 				name: '0 High St',
 				property_address: '0 High Street, Brinkhaven, Ohio 43006',
 				description: '0 High St is the first property Tokrized on the Solana Blockchain. This lot is composed of two parcels of land located in Brinkhaven, OH. This is a vacant lot situated in the Village of Brinkhaven, County of Knox in the State of Ohio. More particularly, the lot is described as follows - Beginning at a point on the East line of High Street in the Village of Gann, now Brinkhaven. Being Lots Nos. 7 & 8 of the L. Gardner Sub-Division.',
-				image: 'https://ipfs.io/ipfs/QmUkk3iu9JwEwoM3VTZQqc5NQnwa2JGZSBXZmkGt3XDNN3?filename=0-HIGH-St.jpg',
+				image: 'https://d2jcpdpj3m9ych.cloudfront.net/genericAssetDirectory/2022-03-17T16:41:11.459334897Z.PNG',
 				lat_long: '40.4687361, -82.1924952',
 				sq_ft: '8712',
 				acres: '0.2',
@@ -783,8 +782,6 @@ const New = (props) => {
 			// 		},
 			// 	],
 			// })
-
-
 		}
 	}, [_prepopulateForDemos])
 
@@ -823,9 +820,9 @@ const New = (props) => {
 	}, [form])
 
 	useEffect(() => {
-		if ((router?.query?.type || proposalType === 1 || proposalType === 2) && realmInfo && (propertyData && propertyData?.name)) {
-			const typeId = router?.query?.type || proposalType;
-			storeData(`${realmInfo?.realmId.toBase58()}${typeId ? "_" + typeId : ''}`, JSON.stringify(propertyData))
+		if ((router?.query?.type || proposalType === 1 || proposalType === 2) && realmInfo && propertyData && propertyData?.name) {
+			const typeId = router?.query?.type || proposalType
+			storeData(`${realmInfo?.realmId.toBase58()}${typeId ? '_' + typeId : ''}`, JSON.stringify(propertyData))
 		}
 	}, [propertyData, router, realmInfo, proposalType])
 
@@ -865,20 +862,18 @@ const New = (props) => {
 		if (!initalLoad) setFormIsValid(checkFormValidity())
 	}, [propertyData, governance, canCreateAction])
 
-
 	const [loadedLS, setLoadedLS] = useState<boolean>(false)
 	useEffect(() => {
-		if (((router?.query?.type || proposalType === 1 || proposalType === 2) && (realmInfo && (initalLoad === false)))) {
-			const typeId = router?.query?.type || proposalType;
-			const temp = getData(`${realmInfo?.realmId.toBase58()}${typeId ? "_" + typeId : ''}`);
+		if ((router?.query?.type || proposalType === 1 || proposalType === 2) && realmInfo && initalLoad === false) {
+			const typeId = router?.query?.type || proposalType
+			const temp = getData(`${realmInfo?.realmId.toBase58()}${typeId ? '_' + typeId : ''}`)
 			if (JSON.parse(temp)?.name) {
-				setPropertyData(JSON.parse(temp));
-				setLoadedLS(true);
+				setPropertyData(JSON.parse(temp))
+				setLoadedLS(true)
 			}
 			console.log(proposalType)
 		}
 	}, [router, realmInfo, initalLoad, proposalType])
-
 
 	return initalLoad ? (
 		<Loader />
@@ -934,7 +929,7 @@ const New = (props) => {
 							{proposalType === 2 && <span dangerouslySetInnerHTML={{ __html: `Proposal for the ${realmDisplayName} to vote on the request for the <a href="/dao/${TOKR_DAO}" class="hover:underline">Tokr DAO</a> to certify ${propertyData?.name ? `<span class="font-bold">${propertyData.name}</span> (property) ` : ' a property '} and mint the rNFT.` }} />}
 						</p>
 
-						{(!_prepopulateForDemos && (loadedLS && (router?.query?.type || proposalType === 2 || proposalType === 1) && realmInfo)) && (
+						{!_prepopulateForDemos && loadedLS && (router?.query?.type || proposalType === 2 || proposalType === 1) && realmInfo && (
 							<p className="mt-16 py-4 border-t border-b border-green">
 								We restored your past entry. Want to start fresh?{' '}
 								<a

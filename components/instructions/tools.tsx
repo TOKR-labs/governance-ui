@@ -29,7 +29,7 @@ export const DEFAULT_GOVERNANCE_PROGRAM_ID = 'A46hUedKdttuKKU3bCA4c1pX47X7TjVGDU
 // export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt' // MAINNET+DEVNET (new)
 export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'A46hUedKdttuKKU3bCA4c1pX47X7TjVGDUH7gJUhoPRZ' // scrappy DEVNET
 
-export const TOKR_DAO = 'ALkNW35wP58efK1k4xpaa9GdbZJSuFraBJqjjzNqoncr'
+export const TOKR_DAO = 'Gik94WvXzsK7v7V19KEmBSgDKuGE1eMgrEusCnsfvZRY'
 
 // Well known account names displayed on the instruction card
 export const ACCOUNT_NAMES = {
