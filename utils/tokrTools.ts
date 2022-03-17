@@ -20,6 +20,7 @@ const TOKEN_VAULT_PROGRAM_ID = new PublicKey("vau1zxA2LbssAUEF7Gpw91zMM1LvXrvpzJ
 
 const TOKR_PROGRAM = new PublicKey('Tokr9wmF3VjWEqQAafPfFNhSTava68UJszr5wxnSuwK')
 
+
 export class TokrizeArgs {
 	instruction = 0
 	name: string
