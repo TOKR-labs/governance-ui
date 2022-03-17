@@ -177,15 +177,13 @@ const New = (props) => {
 			<div className="mt-8 ml-4 -mb-5 relative z-10 m-width-full">
 				<h1 className="bg-dark inline-block">
 					<span className="ml-4 pr-8 text-xl uppercase">
-						Proposal to Tokenize
+						Proposal to Create Vault for DAO
 						{realmDisplayName ? ` for ${realmDisplayName}` : ``}{' '}
 					</span>
 				</h1>
 			</div>
 			<div className="grid grid-cols-12 gap-4">
 				<div className={`border border-fgd-1 bg-bkg-2 col-span-12 md:col-span-7 md:order-first lg:col-span-8 order-last p-4 md:p-6 space-y-3 ${isLoading ? 'pointer-events-none' : ''}`}>
-					<p className="pt-8">Instruction/Intro here ~ Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam libero at sit vitae maxime quod nemo vero eum mollitia quae.</p>
-
 					<>
 						<div className="pt-8 mb-20">
 							<div className="space-y-16">

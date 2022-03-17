@@ -178,7 +178,7 @@ const New = (props) => {
 			<div className="mt-8 ml-4 -mb-5 relative z-10 m-width-full">
 				<h1 className="bg-dark inline-block">
 					<span className="ml-4 pr-8 text-xl uppercase">
-						Proposal to Tokenize
+						Proposal to Add rNFT
 						{realmDisplayName ? ` for ${realmDisplayName}` : ``}{' '}
 					</span>
 				</h1>
