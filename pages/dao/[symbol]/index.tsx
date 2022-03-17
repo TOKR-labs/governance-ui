@@ -337,7 +337,12 @@ const REALM = () => {
 								</div>
 								<div className="mr-4">
 									<NewProposalBtn type={`escrow-vault`}>
-										Escrow Vault
+										Create Vault
+									</NewProposalBtn>
+								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`add-token`}>
+										Add Token To Vault
 									</NewProposalBtn>
 								</div>
 

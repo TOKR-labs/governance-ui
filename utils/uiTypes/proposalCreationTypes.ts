@@ -110,6 +110,13 @@ export interface VaultForm {
   tokenAddress: string
 }
 
+export interface AddTokenToVaultForm {
+  governedAccount: GovernedTokenAccount | undefined
+  fromAddress: string
+  vaultAddress: string
+  tokenAddress: string
+}
+
 export interface EmptyInstructionForm {
   governedAccount: GovernedMultiTypeAccount | undefined
 }

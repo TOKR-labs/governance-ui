@@ -5,7 +5,7 @@ import { Keypair, PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstr
 import { serializeInstructionToBase64 } from '@solana/spl-governance'
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token'
 import { AccountLayout, MintLayout, NATIVE_MINT } from '@solana/spl-token';
-import { InitVault, Vault, VaultProgram } from '@metaplex-foundation/mpl-token-vault';
+import { InitVault, Vault, VaultProgram, SafetyDepositBox } from '@metaplex-foundation/mpl-token-vault';
 import * as metaplex from '@metaplex/js';
 import { WalletAdapter } from '@solana/wallet-adapter-base'
 import type { ConnectionContext } from 'utils/connection'
@@ -74,6 +74,19 @@ export class VaultArgs {
         ['instruction', 'u8'],
         ['vault_bump', 'u8'],
         ['vault_seed', 'string']
+      ]
+    }],
+  ]);
+
+  export class AddTokenArgs {
+    instruction = 2;
+  }
+  
+  export const AddTokenSchema = new Map([
+    [AddTokenArgs, {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
       ]
     }],
   ]);
@@ -236,6 +249,83 @@ export async function getVaultInstruction({
           { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
           { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
           { pubkey: NATIVE_MINT, isSigner: false, isWritable: false },
+        ],
+        programId: TOKR_PROGRAM,
+        data: data
+      }
+    );
+
+    const obj: UiInstruction = {
+        serializedInstruction: serializeInstructionToBase64(instruction),
+        isValid,
+        governance: currentAccount?.governance,
+        prerequisiteInstructions: [],
+    }
+    return obj
+}
+
+
+export async function getAddTokenInstruction({
+    schema,
+    form,
+    programId,
+    connection,
+    wallet,
+    currentAccount,
+    setFormErrors
+    }: {
+    schema: any
+    form: any
+    programId: PublicKey | undefined
+    connection: ConnectionContext
+    wallet: WalletAdapter | undefined
+    currentAccount: GovernedTokenAccount | undefined
+    setFormErrors: any
+    }): Promise<UiInstruction> {
+    const isValid =  true; // todo: await validateInstruction({ schema, form, setFormErrors })
+
+    console.log("Governed Account, ", currentAccount)
+
+    const fromAddress = new PublicKey(form.fromAddress)
+    const vaultAddress = new PublicKey(form.vaultAddress)
+    const tokenAddress = new PublicKey(form.tokenAddress)
+
+    const vaultAuthority = await Vault.getPDA(vaultAddress);
+    const safetyDepositBox = await SafetyDepositBox.getPDA(vaultAddress, tokenAddress);
+    const transferAuthorityKey = (await PublicKey.findProgramAddress([Buffer.from("transfer"), vaultAddress.toBuffer(), tokenAddress.toBuffer()], TOKR_PROGRAM))[0]
+  
+  
+    // const tokenAta = await getAtaPda(w.publicKey, tokenAddress); // todo replace with treasury
+    const tokenStoreKey = (await PublicKey.findProgramAddress([Buffer.from("store"), vaultAddress.toBuffer(), tokenAddress.toBuffer()], TOKR_PROGRAM))[0]
+  
+    console.log("fromAta: ", fromAddress.toBase58());
+    console.log("vault: ", vaultAddress.toBase58());
+    console.log("vaultAuthority: ", vaultAuthority.toBase58());
+    console.log("safetyDepositBox: ", safetyDepositBox.toBase58());
+    console.log("transferAuthority: ", transferAuthorityKey.toBase58());
+    console.log("tokenStoreKey: ", tokenStoreKey.toBase58());
+  
+    const data = Buffer.from(borsh.serialize(
+      AddTokenSchema,
+      new AddTokenArgs()
+    ));
+  
+    const instruction = new TransactionInstruction(
+      {
+        keys: [
+          { pubkey: tokenAddress, isSigner: false, isWritable: true },
+          { pubkey: wallet!.publicKey!, isSigner: true, isWritable: true },
+          { pubkey: fromAddress, isSigner: false, isWritable: true },
+          { pubkey: transferAuthorityKey, isSigner: false, isWritable: true },
+          { pubkey: vaultAddress, isSigner: false, isWritable: true },
+          { pubkey: vaultAuthority, isSigner: false, isWritable: true },
+          { pubkey: tokenStoreKey, isSigner: false, isWritable: true },
+          { pubkey: safetyDepositBox, isSigner: false, isWritable: true },
+          { pubkey: TOKEN_VAULT_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+          { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
+          { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
         ],
         programId: TOKR_PROGRAM,
         data: data
