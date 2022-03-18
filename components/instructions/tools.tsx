@@ -27,7 +27,7 @@ export const DEFAULT_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbg
  */
 export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt'
 
-export const TOKR_DAO = 'BniPNmX3uG4cV3wuhvUSBrUZtg1x6mmXRHfsjZDyc6Ba'
+export const TOKR_DAO = 'BniPNmX3uG4cV3wuhvUSBrUZtg1x6mmXRHfsjZDyc6Ba' // MainNet Tokr Doa realmId
 
 // Well known account names displayed on the instruction card
 export const ACCOUNT_NAMES = {

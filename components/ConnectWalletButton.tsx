@@ -309,7 +309,7 @@ const ConnectWalletButton = (props) => {
 
 	const provider = useMemo(() => getWalletProviderByUrl(providerUrl), [providerUrl])
 
-	const [useDevnet, setUseDevnet] = useState(false)
+	const [useDevnet, setUseDevnet] = useState(false) // Update default
 	const router = useRouter()
 	const handleToggleDevnet = () => {
 		// setUseDevnet(!useDevnet)
