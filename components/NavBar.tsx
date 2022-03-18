@@ -9,13 +9,13 @@ const NavBar = props => {
 
 	return (
 		<>
-			{!props.web3 && (
+			{/* {!props.web3 && (
 				<>
 					<a href="https://phantom.app/download" target="_blank" className="bg-green text-dark block w-full text-center py-2 px-16">
 						<span className="text-black">tokr_ Realms</span> requires a Web3 crypto wallet
 					</a>
 				</>
-			)}
+			)} */}
 			<div className="grid grid-cols-12 mb-3 border-b border-green">
 				<div className="col-span-12 xl:col-start-2 xl:col-span-10 flex h-20 items-center justify-between px-4 md:px-8 xl:px-4">
 					<a
