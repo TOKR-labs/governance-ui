@@ -156,7 +156,7 @@ const Proposal = () => {
 			if (pollingCount === 10) {
 				alert(msg)
 			} else {
-				console.log(`Attempt [${pollingCount}]` + msg)
+				if (pollingCount > 0) console.log(`Attempt [${pollingCount}]` + msg)
 			}
 		}
 	}, [pollingCount])
