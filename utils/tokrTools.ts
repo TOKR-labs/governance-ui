@@ -15,8 +15,6 @@ const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzj
 
 const TOKR_PROGRAM = new PublicKey('Tokr9wmF3VjWEqQAafPfFNhSTava68UJszr5wxnSuwK')
 
-
-
 export class TokrizeArgs {
 	instruction = 0
 	name: string
@@ -59,88 +57,70 @@ const TokrizeSchema = new Map([
  * TODO integrate into
  */
 
-export async function getTokrInstruction({
-    schema,
-    form,
-    programId,
-    connection,
-    wallet,
-    currentAccount,
-    setFormErrors
-    }: {
-    schema: any
-    form: any
-    programId: PublicKey | undefined
-    connection: ConnectionContext
-    wallet: WalletAdapter | undefined
-    currentAccount: GovernedTokenAccount | undefined
-    setFormErrors: any
-    }): Promise<UiInstruction> {
-    const isValid =  true; // todo: await validateInstruction({ schema, form, setFormErrors })
+export async function getTokrInstruction({ schema, form, programId, connection, wallet, currentAccount, setFormErrors }: { schema: any; form: any; programId: PublicKey | undefined; connection: ConnectionContext; wallet: WalletAdapter | undefined; currentAccount: GovernedTokenAccount | undefined; setFormErrors: any }): Promise<UiInstruction> {
+	const isValid = true // todo: await validateInstruction({ schema, form, setFormErrors })
 
+	let serializedInstruction = ''
+	const prerequisiteInstructions: TransactionInstruction[] = []
+	// Generate a mint
 
-    let serializedInstruction = ''
-    const prerequisiteInstructions: TransactionInstruction[] = []
-    // Generate a mint
+	console.log(`Token info. Name: ${form.name}, Symbol: ${form.symbol}, Uri: ${form.metaDataUri}, Destination: ${form.destinationAddress}`)
 
-    console.log(`Token info. Name: ${form.name}, Symbol: ${form.symbol}, Uri: ${form.metaDataUri}, Destination: ${form.destinationAddress}`);
+	let destinationAccount = new PublicKey(String(form.destinationAddress))
 
-    let destinationAccount = new PublicKey(String(form.destinationAddress));
+	let mintSeed = 'wrvhtzl51t1zz4po9jlsei6ezdr0kn' //(Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
+	const mintPdaData = await getMintPda(wallet!.publicKey!, mintSeed, destinationAccount)
+	const mintKey = mintPdaData[0]
+	const mintBump = mintPdaData[1]
 
-    let mintSeed = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
-    const mintPdaData = await getMintPda(wallet!.publicKey!, mintSeed, destinationAccount);
-    const mintKey = mintPdaData[0];
-    const mintBump = mintPdaData[1];
+	const metadataKey = await getMetadataPda(mintKey)
 
-    const metadataKey = await getMetadataPda(mintKey);
+	const ataKey = await getAtaPda(destinationAccount, mintKey)
 
-    const ataKey = await getAtaPda(destinationAccount, mintKey);
+	console.log('Payer:', wallet!.publicKey!.toBase58())
+	console.log('Destination: ', destinationAccount.toBase58())
+	console.log('Mint:', mintKey.toBase58())
+	console.log('Ata:', ataKey.toBase58())
 
-    console.log("Payer:", wallet!.publicKey!.toBase58());
-    console.log("Destination: ", destinationAccount.toBase58());
-    console.log("Mint:", mintKey.toBase58());
-    console.log("Ata:", ataKey.toBase58());
+	const data = Buffer.from(
+		borsh.serialize(
+			TokrizeSchema,
+			new TokrizeArgs({
+				name: String(form.name),
+				symbol: String(form.symbol),
+				uri: String(form.metaDataUri),
+				mint_seed: mintSeed,
+				mint_bump: mintBump,
+			})
+		)
+	)
 
-    const data = Buffer.from(borsh.serialize(
-        TokrizeSchema,
-        new TokrizeArgs({
-          name:  String(form.name),
-          symbol: String(form.symbol),
-          uri: String(form.metaDataUri),
-          mint_seed: mintSeed,
-          mint_bump: mintBump
-        })
-    ));
+	const instruction = new TransactionInstruction({
+		keys: [
+			{ pubkey: wallet!.publicKey!, isSigner: true, isWritable: true }, // payer
+			{ pubkey: destinationAccount, isSigner: false, isWritable: true }, // NFT destination
+			{ pubkey: wallet!.publicKey!, isSigner: true, isWritable: true }, // NFT creator
+			{ pubkey: mintKey, isSigner: false, isWritable: true }, // Mint Account to create
+			{ pubkey: metadataKey, isSigner: false, isWritable: true }, // Metadata account to create
+			{ pubkey: ataKey, isSigner: false, isWritable: true }, // New associated token account for destination
+			{ pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }, // SPL token program
+			{ pubkey: TOKEN_METADATA_PROGRAM_ID, isSigner: false, isWritable: false }, // Metaplex token program
+			{ pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // SPL system program
+			{ pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false }, // SPL rent program
+			{ pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }, // SPL ata program
+		],
+		programId: TOKR_PROGRAM,
+		data: data,
+	})
+	serializedInstruction = serializeInstructionToBase64(instruction)
 
-
-    const instruction = new TransactionInstruction(
-    {
-        keys: [
-            {pubkey: wallet!.publicKey!, isSigner: true, isWritable: true},           // payer
-            {pubkey: destinationAccount, isSigner: false, isWritable: true},          // NFT destination
-            {pubkey: wallet!.publicKey!, isSigner: true, isWritable: true},           // NFT creator
-            {pubkey: mintKey, isSigner: false, isWritable: true},                     // Mint Account to create
-            {pubkey: metadataKey, isSigner: false, isWritable: true},                 // Metadata account to create
-            {pubkey: ataKey, isSigner: false, isWritable: true},                      // New associated token account for destination
-            {pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false},           // SPL token program
-            {pubkey: TOKEN_METADATA_PROGRAM_ID, isSigner: false, isWritable: false},  // Metaplex token program
-            {pubkey: SystemProgram.programId, isSigner: false, isWritable: false},    // SPL system program
-            {pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false},         // SPL rent program
-            {pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false} // SPL ata program
-        ],
-        programId: TOKR_PROGRAM,
-        data: data
-    }
-    );
-    serializedInstruction = serializeInstructionToBase64(instruction)
-
-    const obj: UiInstruction = {
-        serializedInstruction,
-        isValid,
-        governance: currentAccount?.governance,
-        prerequisiteInstructions: prerequisiteInstructions,
-    }
-    return obj
+	const obj: UiInstruction = {
+		serializedInstruction,
+		isValid,
+		governance: currentAccount?.governance,
+		prerequisiteInstructions: prerequisiteInstructions,
+	}
+	return obj
 }
 
 // todo try to find better seed and do not use the wallet either.
