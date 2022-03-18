@@ -90,7 +90,7 @@ export function getCertifiedRealmInfo(
 // Other excluded ones are know test DAOs like Test 'Grape Test' for example
 
 const EXCLUDED_REALMS = new Map<string, string>([
-  ['HtV3PXqDhuPoCTDfYhaWxrs5e7oYk96zYpiWSrWCj6FC', ''],
+  ['8ev7GiaQBzdNzGi9NRNhZYoNdKxdMVg2WHLHE9KQx77c', ''],
   ['3mBJhp6w7Sqi6JhbnNvV6yi3RHDveUGsmzeyWprBFBWB', ''],
   ['4Q1s1vQkgfnyZNWdhehQ8q8jwy4zAtFnznzRVqs72VF3', ''],
   ['3wMVntu1fPdUbk1RLm5vSnGoiapK2ALqf6NENtescMqr', ''],
