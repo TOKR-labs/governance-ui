@@ -195,6 +195,18 @@ export const ConnectWalletButtonAlternative = (props) => {
 
 	const walletAddressFormatted = current?.publicKey ? abbreviateAddress(current?.publicKey) : ''
 
+
+	const [useDevnet, setUseDevnet] = useState(false)
+	const router = useRouter()
+	const handleToggleDevnet = () => {
+		setUseDevnet(!useDevnet)
+		if (useDevnet) {
+			router.push(`${window.location.pathname}`)
+		} else {
+			router.push(`${window.location.href}?cluster=devnet`)
+		}
+	}
+
 	return (
 		<div className="flex">
 			<button disabled={connected} className={`bg-transparent border border-fgd-4 border-r-0 default-transition flex h-12 items-center pl-1 pr-2 ${connected ? 'cursor-default' : 'hover:bg-bkg-3 focus:outline-none'}`} onClick={handleConnectDisconnect} {...props}>
@@ -290,6 +302,22 @@ export const ConnectWalletButtonAlternative = (props) => {
 												<button className="flex default-transition h-9 items-center p-2 w-full hover:bg-bkg-3 hover:cursor-pointer hover:rounded font-normal focus:outline-none">
 													<BackspaceIcon className="h-4 w-4 mr-2" />
 													<span className="text-sm">Disconnect</span>
+												</button>
+											</Menu.Item>
+											<Menu.Item
+												key={'devnet'}
+												onClick={() => {
+													handleToggleDevnet()
+												}}
+											>
+												<button className="flex default-transition h-9 items-center p-2 w-full hover:bg-bkg-3 hover:cursor-pointer hover:rounded font-normal focus:outline-none">
+													<span className="text-sm">Devnet</span>
+													<Switch
+														checked={useDevnet}
+														onChange={() => {
+															handleToggleDevnet()
+														}}
+													/>
 												</button>
 											</Menu.Item>
 										</>
