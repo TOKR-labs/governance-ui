@@ -1,14 +1,15 @@
 [
 	{
-		"symbol": "6oQgdREFwoabzyLZoF3UrwCRyKa1EHmZ1qihXezUbKAR",
-		"displayName": "Group DAO Test",
-		"programId": "A46hUedKdttuKKU3bCA4c1pX47X7TjVGDUH7gJUhoPRZ",
-		"realmId": "6oQgdREFwoabzyLZoF3UrwCRyKa1EHmZ1qihXezUbKAR"
-	},
-	{
-		"symbol": "4YWe67bC9B4YWy6MCqMDBSe2xekFGSMVeqEzCx3Ziebd",
-		"displayName": "Kmack Test DAO 1",
-		"programId": "A46hUedKdttuKKU3bCA4c1pX47X7TjVGDUH7gJUhoPRZ",
-		"realmId": "4YWe67bC9B4YWy6MCqMDBSe2xekFGSMVeqEzCx3Ziebd"
+		"symbol": "8ev7GiaQBzdNzGi9NRNhZYoNdKxdMVg2WHLHE9KQx77c",
+		"displayName": "Tokr",
+		"programId": "ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt",
+		"realmId": "8ev7GiaQBzdNzGi9NRNhZYoNdKxdMVg2WHLHE9KQx77c",
+		"ogImage": "/images/tokr_icon_lt.png"
+	}, {
+		"symbol": "9QjdYZcDKvEGEtvd3BkSxixxG3N6TtLb9F1TufyviaXc",
+		"displayName": "Solana Beach Club",
+		"programId": "ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt",
+		"realmId": "9QjdYZcDKvEGEtvd3BkSxixxG3N6TtLb9F1TufyviaXc",
+		"ogImage": "/images/solana_beach_icon.png"
 	}
 ]

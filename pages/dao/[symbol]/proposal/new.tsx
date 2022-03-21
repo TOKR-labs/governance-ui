@@ -73,7 +73,6 @@ function extractGovernanceAccountFromInstructionsData(instructionsData: Componen
 }
 
 const New = (props) => {
-	const _prepopulateForDemos = true
 	const router = useRouter()
 	const { history, getPathName } = useRouterHistory()
 	const client = useVoteStakeRegistryClientStore((s) => s.state.client)
@@ -118,6 +117,7 @@ const New = (props) => {
 		ein_number: '',
 		title_method: 'Sole Ownership',
 		transfer_restrictions: '',
+		title_insured_by: '',
 		title_insurance: '',
 		deed: '',
 		purchase_contract: '',
@@ -185,6 +185,10 @@ const New = (props) => {
 			},
 			{
 				trait_type: 'transfer_restrictions',
+				value: '',
+			},
+			{
+				trait_type: 'title_insured_by',
 				value: '',
 			},
 			{
@@ -392,26 +396,25 @@ const New = (props) => {
 
 
 			const url = constructUri(router.query?.uri.toString(), true);
-			if (_prepopulateForDemos !== true) {
-				fetch(url, {
-					method: 'GET',
+
+			fetch(url, {
+				method: 'GET',
+			})
+			.then((res) => res.json())
+			.then((res) => {
+				const temp = res.attributes.map((attribute) => {
+					res[attribute.trait_type] = attribute.value
 				})
-					.then((res) => res.json())
-					.then((res) => {
-						const temp = res.attributes.map((attribute) => {
-							res[attribute.trait_type] = attribute.value
-						})
 
-						setPropertyData({
-							...res,
-						})
+				setPropertyData({
+					...res,
+				})
 
-						return res
-					})
-					.catch((error) => {
-						console.log('error', error)
-					})
-			}
+				return res
+			})
+			.catch((error) => {
+				console.log('error', error)
+			})
 		}
 	}, [router])
 
@@ -567,6 +570,10 @@ const New = (props) => {
 							value: propertyData.transfer_restrictions,
 						},
 						{
+							trait_type: 'title_insured_by',
+							value: propertyData.title_insured_by,
+						},
+						{
 							trait_type: 'title_insurance',
 							value: propertyData.title_insurance,
 						},
@@ -633,165 +640,6 @@ const New = (props) => {
 		}
 	}, [propertyData])
 
-	useEffect(() => {
-		console.log("\n\n\n\n\n\nmetaplexDataObj", metaplexDataObj, JSON.stringify(metaplexDataObj))
-	},[metaplexDataObj])
-
-	useLayoutEffect(() => {
-		if (_prepopulateForDemos) {
-			setPropertyData({
-				symbol: 'rNFT',
-				name: '0 High St',
-				property_address: '0 High Street, Brinkhaven, Ohio 43006',
-				description: '0 High St is the first property Tokrized on the Solana Blockchain. This lot is composed of two parcels of land located in Brinkhaven, OH. This is a vacant lot situated in the Village of Brinkhaven, County of Knox in the State of Ohio. More particularly, the lot is described as follows - Beginning at a point on the East line of High Street in the Village of Gann, now Brinkhaven. Being Lots Nos. 7 & 8 of the L. Gardner Sub-Division.',
-				image: 'https://ipfs.io/ipfs/QmUkk3iu9JwEwoM3VTZQqc5NQnwa2JGZSBXZmkGt3XDNN3?filename=0-HIGH-St.jpg',
-				lat_long: '40.4687361, -82.1924952',
-				sq_ft: '8712',
-				acres: '0.2',
-				type: 'Lot',
-				tax_parcel_numbers: '881082701',
-				title_held_by: 'Real Fake Lot LLC, an Ohio limited liability company',
-				ein_number: '881082701',
-				title_method: 'Sole Ownership',
-				transfer_restrictions: 'None',
-				title_insurance: 'https://ipfs.io/ipfs/QmYW883tTUNdv1PRgdRjPkL3Q7bEcX2XnuXm6METXnLpyf?filename=0-High-St-Title-Insurance-Pro-Forma-Owner-Policy-Schedules-Endorsements.pdf',
-				deed: 'https://ipfs.io/ipfs/QmdbJJAL6STiJj11YdmFGnXAUv2ddrruoU5S1Cr2yoEhMd?filename=0-High-St-Deed-Signed.pdf',
-				purchase_contract: 'https://ipfs.io/ipfs/QmTmHrmEP9WetSFLQKUwmrNC8UE34NVG9cD5SDP9votxAk?filename=0-High-St-Purchase-Contract.pdf',
-				mortgage: 'N/A',
-				lao_articles_of_organization_from_secretary_of_state: 'https://ipfs.io/ipfs/QmR6oY1UWRJNKwfJ4Lq1ozRD6CFUvfdpw3DCo3cQxZciYz?filename=0-High-St-LAO-Articles-of-Organization.pdff',
-				spv_articles_of_organization_from_secretary_of_state: 'https://ipfs.io/ipfs/QmP77GkQTNecw6Xx6CitafNDKA8Fj97tiJoGayhp673gdD?filename=0-High-St-SPV-Articles-of-Organization.pdf',
-				spv_operating_agreement: 'https://ipfs.io/ipfs/QmSsbYQyVQLjQSDwGFhrtsJMA6VPAViMgSbXqLWfiJfLZK?filename=0-High-St-Operating-Agreement-REAL-FAKE-LOT-LLC.pdf',
-				ein_letter_from_irs: 'https://ipfs.io/ipfs/QmdTvxs5dvSvAwhLZqgnopWJyrkVezChNpYT5c4T27RqZM?filename=0-High-St-EIN-Real-Fake-Lot-LLC.pdf',
-				assignment_of_membership_interests_agreement: 'https://ipfs.io/ipfs/QmXWbQD18wtkUAZayxdyx6Pmrcx8gjrLM9Tpas58JY94SV?filename=0-High-St-Assignment-of-Membership-Interests-Agreement-Real-Fake-Lot.pdf',
-				submitted_by_authorized_representative: 'Calvin Cooper',
-				legal: `Buyer and Seller hereby acknowledge and agree that each have become a party to the Assignment of Membership Interests by purchasing or selling this rNFT, which Assignment of Membership Interests is linked in the rNFT metadata and is effective as of the date and time of the transfer of the rNFT. Buyer and Seller hereby acknowledge and agree that, by signing the smart contract to transfer this rNFT for the consideration documented on the blockchain, each are effectuating the transfer of the Membership Interest described in the Assignment of Membership Interest from Seller to Buyer upon the terms and subject to the conditions contained therein. \nThe Current Owner, Tokr DAO, and any Tokr affiliates or contributors to the open source software and systems involved in the Tokr Protocol and the minting of this rNFT hereby disclaim any representation or warranty relating to the sufficiency or adequacy of the title to the real estate owned by the entity specified in the rNFT metadata, and, by purchasing this rNFT, you hereby acknowledge that you are not relying on any such representations or warranties. Linked in the metadata is a copy of the Owner's Title Insurance Policy that was obtained at the time of acquisition (or subsequently as amended in the metadata, if applicable). The metadata and documentation submitted as part of rNFT certification and verification process is intended to make data collection easier to assist you in conducting your own due diligence. It is strongly encouraged that you conduct your own research and additional due diligence as it relates to the sufficiency and adequacy of the title to such real estate prior to acquiring this rNFT, which may include obtaining a title insurance policy. Any validations or certifications made by the Current Owner or Tokr DAO and any affiliates or contributors relating to the rNFT do not relate to the title of such real estate.`,
-				uri: arWeaveLink || '',
-			})
-			// setMetaplexDataObj({
-			// 	name: 'White House',
-			// 	symbol: 'tokr_',
-			// 	description: 'The White House is the official residence and workplace of the president of the United States.',
-			// 	image: 'https://ipfs.io/ipfs/QmPZR8h2CUY8CZW77oLDQ51ctPqZEbZXKVaC5xYQgPPbzX?filename=white-house_photo.png',
-			// 	attributes: [
-			// 		{
-			// 			trait_type: 'name',
-			// 			value: 'White House',
-			// 		},
-			// 		{
-			// 			trait_type: 'description',
-			// 			value: 'The White House is the official residence and workplace of the president of the United States.',
-			// 		},
-			// 		{
-			// 			trait_type: 'property_address',
-			// 			value: '1600 Pennsylvania Avenue NW, Washington, DC 20500',
-			// 		},
-			// 		{
-			// 			trait_type: 'lat_long',
-			// 			value: '38.898819, -77.036690',
-			// 		},
-			// 		{
-			// 			trait_type: 'acres',
-			// 			value: '18',
-			// 		},
-			// 		{
-			// 			trait_type: 'land_record_auditor',
-			// 			value: 'lorem ipsum',
-			// 		},
-			// 		{
-			// 			trait_type: 'deed_record_recorder',
-			// 			value: 'lorem ipsum',
-			// 		},
-			// 		{
-			// 			trait_type: 'mortgage_record_recorder',
-			// 			value: 'lorem ipsum',
-			// 		},
-			// 		{
-			// 			trait_type: 'legal_description',
-			// 			value: 'Legal description of the White House pulled from official record',
-			// 		},
-			// 		{
-			// 			trait_type: 'mortgage_record',
-			// 			value: 'lorem ipsum',
-			// 		},
-			// 		{
-			// 			trait_type: 'title_method',
-			// 			value: 'Sole ownership',
-			// 		},
-			// 		{
-			// 			trait_type: 'title_held_by',
-			// 			value: 'The People',
-			// 		},
-			// 		{
-			// 			trait_type: 'ein',
-			// 			value: '123445555',
-			// 		},
-			// 		{
-			// 			trait_type: 'transfer_restrictions',
-			// 			value: 'None',
-			// 		},
-			// 		{
-			// 			trait_type: 'marketing_name',
-			// 			value: 'White House',
-			// 		},
-			// 		{
-			// 			trait_type: 'type',
-			// 			value: 'Building',
-			// 		},
-			// 		{
-			// 			trait_type: 'sq_ft',
-			// 			value: '54,900',
-			// 		},
-			// 		{
-			// 			trait_type: 'property_description',
-			// 			value: 'The White House is the official residence and workplace of the president of the United States.',
-			// 		},
-			// 		{
-			// 			trait_type: 'deed',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'mortgage',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'title_insurance',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'articles_of_organization',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'certificate_of_organization_from_secretary_of_state',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'operating_agreement',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'membership_interest_transfer_agreement',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'ein_letter_from_irs',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'appraisal',
-			// 			value: 'https://ipfs.io/ipfs/QmaHoFcUyHdd1ZE55gtqeJAKqif7k53sLusyaaPzXA6n8N?filename=tokr_screenshot_1.png',
-			// 		},
-			// 		{
-			// 			trait_type: 'submitted_by',
-			// 			value: 'John Adams',
-			// 		},
-			// 	],
-			// })
-
-
-		}
-	}, [_prepopulateForDemos])
-
 	const setProposalForSubmit = async (link) => {
 		const descriptionObj = {
 			description: proposalType === 0 ? propertyName + ' Proposal' : `Proposal to ${proposalType === 1 ? 'Purchase Real Estate and Begin Syndication' : 'Proposal to Request Tokr DAO to certify property and mint rNFT'}`,
@@ -845,15 +693,7 @@ const New = (props) => {
 	}, [governanceItems, history])
 
 	const [formIsValid, setFormIsValid] = useState<boolean>(false)
-	// const isFormValid = (namespaceSelector: string | undefined | null):boolean => {
-	// 	if (process?.browser && document) {
-	// 		const formInputs = document.querySelectorAll(`${namespaceSelector ? (namespaceSelector + ' ') : ''}.field-validate:not(:valid)`) || [];
-	// 		console.log(formInputs, "am I valid")
-	// 		return ((formInputs.length > 0) ? false : true);
-	// 	} else {
-	// 		return false;
-	// 	}
-	// };
+
 	const checkFormValidity = (): boolean => {
 		if (!canCreateAction) return false
 		if (process?.browser && document) {
@@ -878,8 +718,8 @@ const New = (props) => {
 			if (JSON.parse(temp)?.name) {
 				setPropertyData(JSON.parse(temp));
 				setLoadedLS(true);
+				setPropertyName(JSON.parse(temp)?.name)
 			}
-			console.log(proposalType)
 		}
 	}, [router, realmInfo, initalLoad, proposalType])
 
@@ -938,7 +778,7 @@ const New = (props) => {
 							{proposalType === 2 && <span dangerouslySetInnerHTML={{ __html: `Proposal for the ${realmDisplayName} to vote on the request for the <a href="/dao/${TOKR_DAO}" class="hover:underline">Tokr DAO</a> to certify ${propertyData?.name ? `<span class="font-bold">${propertyData.name}</span> (property) ` : ' a property '} and mint the rNFT.` }} />}
 						</p>
 
-						{loadedLS && (router?.query?.type || proposalType === 2 || proposalType === 1) && realmInfo && (
+						{/* {loadedLS && (router?.query?.type || proposalType === 2 || proposalType === 1) && realmInfo && (
 							<p className="mt-16 py-4 border-t border-b border-green">
 								We restored your past entry. Want to start fresh?{' '}
 								<a
@@ -956,12 +796,11 @@ const New = (props) => {
 											title_held_by: '',
 											ein_number: '',
 											transfer_restrictions: '',
-											marketing_name: '',
 											type: '',
 											sq_ft: '',
-											property_legal_description: '',
 											tax_parcel_numbers: '',
 											deed: '',
+											title_insured_by: '',
 											title_insurance: '',
 											purchase_contract: '',
 											mortgage: '',
@@ -982,7 +821,7 @@ const New = (props) => {
 									Click here.
 								</a>
 							</p>
-						)}
+						)} */}
 
 						<>
 							<div className="pt-8 mb-20">
@@ -1176,7 +1015,7 @@ const New = (props) => {
 														value={propertyData.sq_ft}
 														id="sq_ft"
 														name="sq_ft"
-														type="tel"
+														type="text"
 														className="field-validate"
 														required
 														// error={propertyDataErrors['sq_ft']}
@@ -1342,12 +1181,38 @@ const New = (props) => {
 
 														<div className="xpb-4">
 															<Input
-																label="Title Insurance"
-																placeholder="Title Insuranced By"
+																label="Title Insured By"
+																// placeholder=""
+																value={propertyData.title_insured_by}
+																id="title_insured_by"
+																name="title_insured_by"
+																type="text"
+																className="field-validate"
+																required
+																// error={propertyDataErrors['title_insured_by']}
+																onChange={(evt) =>
+																	handleSetPropertyData({
+																		value: evt.target.value,
+																		propertyName: 'title_insured_by',
+																	})
+																}
+															/>
+														</div>
+													</div>
+
+													<div className="space-y-4">
+														<h3>
+															<span className="text-lg">Documentation</span>
+														</h3>
+
+														<div className="xpb-4">
+															<Input
+																label="Title Insurance Policy"
+																placeholder="https://"
 																value={propertyData.title_insurance}
 																id="title_insurance"
 																name="title_insurance"
-																type="text"
+																type="url"
 																className="field-validate"
 																required
 																// error={propertyDataErrors['title_insurance']}
@@ -1359,12 +1224,7 @@ const New = (props) => {
 																}
 															/>
 														</div>
-													</div>
 
-													<div className="space-y-4">
-														<h3>
-															<span className="text-lg">Documentation</span>
-														</h3>
 														<div className="xpb-4">
 															<Input
 																label="Deed"

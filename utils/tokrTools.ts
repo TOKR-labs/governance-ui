@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { Keypair, PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstruction } from '@solana/web3.js'
+import { Keypair, PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstruction, Transaction } from '@solana/web3.js'
 import { serializeInstructionToBase64 } from '@solana/spl-governance'
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token'
 import { AccountLayout, MintLayout, NATIVE_MINT } from '@solana/spl-token';
@@ -120,26 +120,59 @@ export class VaultArgs {
 
     let serializedInstruction = ''
     const prerequisiteInstructions: TransactionInstruction[] = []
-    // Generate a mint
 
+    // Generate a mint
     console.log(`Token info. Name: ${form.name}, Symbol: ${form.symbol}, Uri: ${form.metaDataUri}, Destination: ${form.destinationAddress}`);
 
-    let destinationAccount = new PublicKey(String(form.destinationAddress));
+     
+    let instruction = await getMintInstruction(form, wallet)  
+    let isSuccess = false;
+    while (!isSuccess) {
+        let tx = new Transaction()
+        tx.add(instruction)
+        tx.feePayer = wallet!.publicKey!
 
+        let result = await connection.current.simulateTransaction(tx);
+        if (result.value.err) {
+            console.log("Simulation Failed!")
+            instruction = await getMintInstruction(form, wallet)  
+        } else {
+            console.log("Simulation Success!")
+            isSuccess = true;
+        }
+    }
+
+    serializedInstruction = serializeInstructionToBase64(instruction)
+
+    const obj: UiInstruction = {
+        serializedInstruction,
+        isValid,
+        governance: currentAccount?.governance,
+        prerequisiteInstructions: prerequisiteInstructions,
+    }
+    return obj
+}
+
+async function getMintInstruction(form: any, wallet: WalletAdapter | undefined): Promise<TransactionInstruction> {
+  
+    // Generate a mint
+  
+    let destinationAccount = new PublicKey(String(form.destinationAddress));
+  
     let mintSeed = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
     const mintPdaData = await getMintPda(wallet!.publicKey!, mintSeed, destinationAccount);
     const mintKey = mintPdaData[0];
     const mintBump = mintPdaData[1];
-
+  
     const metadataKey = await getMetadataPda(mintKey);
-
+  
     const ataKey = await getAtaPda(destinationAccount, mintKey);
-
+  
     console.log("Payer:", wallet!.publicKey!.toBase58());
     console.log("Destination: ", destinationAccount.toBase58());
     console.log("Mint:", mintKey.toBase58());
     console.log("Ata:", ataKey.toBase58());
-
+  
     const data = Buffer.from(borsh.serialize(
         TokrizeSchema,
         new TokrizeArgs({
@@ -150,9 +183,9 @@ export class VaultArgs {
           mint_bump: mintBump
         })
     ));
+  
+    return new TransactionInstruction(
 
-
-    const instruction = new TransactionInstruction(
         {
             keys: [
                 {pubkey: wallet!.publicKey!, isSigner: true, isWritable: true},           // payer
@@ -171,15 +204,6 @@ export class VaultArgs {
             data: data
         }
     );
-    serializedInstruction = serializeInstructionToBase64(instruction)
-
-    const obj: UiInstruction = {
-        serializedInstruction,
-        isValid,
-        governance: currentAccount?.governance,
-        prerequisiteInstructions: prerequisiteInstructions,
-    }
-    return obj
 }
 
 

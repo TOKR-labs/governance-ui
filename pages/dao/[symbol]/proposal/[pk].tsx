@@ -68,7 +68,7 @@ const Proposal = () => {
 
 	useLayoutEffect(() => {
 		if (propertyDetails && proposalType) {
-			setInitalLoad(false)
+			// setInitalLoad(false)
 		}
 	}, [propertyDetails, proposalType])
 
@@ -83,7 +83,7 @@ const Proposal = () => {
 					method: 'GET',
 				}).then((res) => res.json())
 				.then(res => {
-					setArData(tempId, res);
+					if (res?.name) setArData(tempId, res);
 					return res;
 				})
 			}
@@ -119,7 +119,7 @@ const Proposal = () => {
 			setDescription(description)
 
 			if (!intake) {
-				setInitalLoad(false);
+				// setInitalLoad(false);
 				setGenericProposal(true);
 			}
 		}
@@ -148,15 +148,15 @@ const Proposal = () => {
 	const [pollingCount, setPollingCount] = useState<number>(0)
 
 	useEffect(() => {
-		if (pollingCount >= 6) {
+		if (pollingCount >= 5) {
 			setPolling(false);
 			setInitalLoad(false);
 		} else {
 			const msg = `Something went wrong. Please try to refresh the page.\nIf the issue persists, please contact support@rhove.com`
-			if (pollingCount === 10) {
+			if (pollingCount === 6) {
 				alert(msg)
 			} else {
-				console.log(`Attempt [${pollingCount}]` + msg)
+				if (pollingCount > 0) console.log(`Attempt [${pollingCount}]` + msg)
 			}
 		}
 	}, [pollingCount])
@@ -164,9 +164,11 @@ const Proposal = () => {
 	useInterval(
 		() => {
 			if (genericProposal) {
-				setPolling(false)
-				setInitalLoad(false)
-				return false;
+				if (proposalType !== 0 && proposalType !== 1 && proposalType !== 2) {
+					setPolling(false)
+					setInitalLoad(false)
+					return false;
+				}
 			} else {
 
 				setInitalLoad(true)
@@ -179,9 +181,9 @@ const Proposal = () => {
 					if (descriptionObj && descriptionObj[0].uri) {
 						getDataObj(true)
 							.then((res) => {
-								setPropertyDetails(res);
-								setPolling(false);
-								setInitalLoad(false);
+								if (res?.name) setPropertyDetails(res);
+								if (res?.name) setPolling(false);
+								if (res?.name) setInitalLoad(false);
 								return res
 							})
 							.then((res) => {
@@ -189,13 +191,15 @@ const Proposal = () => {
 							})
 							.catch((error) => {
 								const msg = `Something went wrong. \Please verify the format of the data in ${descriptionObj && descriptionObj[0].uri} or refresh the page.`
-								if (pollingCount === 10) {
+								if (pollingCount === 6) {
 									alert(msg)
 								} else {
-									console.log(`Attempt [${pollingCount}]` + msg)
+									if (pollingCount > 0) console.log(`Attempt [${pollingCount}]` + msg)
+									if (pollingCount === 5) {
+										setPolling(false)
+										setInitalLoad(false)
+									}
 								}
-								setPolling(false)
-								setInitalLoad(false)
 								console.log('error', error)
 							})
 					}
@@ -204,6 +208,17 @@ const Proposal = () => {
 		},
 		isPolling ? delay : null
 	)
+
+
+	useEffect(() => {
+		if (initalLoad && realmDisplayName && (proposalType !== 0 || proposalType !== 1 || proposalType !== 2) && !intake) {
+			setIntake(false);
+			setInitalLoad(false);
+			// setPollingCount(4);
+			setPolling(false);
+		}
+	}, [initalLoad, intake, proposalType, realmDisplayName, genericProposal])
+
 
 	return initalLoad ? (
 		<Loader />

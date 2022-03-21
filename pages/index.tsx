@@ -35,20 +35,6 @@ const Index = () => {
 	const [successfulConnect, setSuccessfulConnect] = useState(false)
 	const { connected, current: wallet } = useWalletStore((s) => s)
 
-	const handleCreateRealmButtonClick = async () => {
-		if (!connected) {
-			try {
-				if (wallet) await wallet.connect()
-			} catch (error) {
-				const err = error as Error
-				return notify({
-					type: 'error',
-					message: err.message,
-				})
-			}
-		}
-		router.push(fmtUrlWithCluster(`/realms/new`))
-	}
 
 	useLayoutEffect(() => {
 		document?.querySelector("html")?.classList.add('u-fs-4')
@@ -57,9 +43,6 @@ const Index = () => {
 	return (<>
 		<a
 			href="/realms"
-			onClick={() => {
-				router.push(fmtUrlWithCluster(`/realms`))
-			}}
 			className="flex w-full h-full-min items-center justify-center"
 		>
 			<div className="flex flex-col justify-center items-center min-h-screen">
@@ -76,7 +59,7 @@ const Index = () => {
 				<div>&lt; ENTER &gt;</div>
 			</div>
 		</a>
-		<div className='hidden'>
+		{/* <div className='hidden'>
 			<pre className='ascii text-center text-legal pt-16'>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
@@ -103,7 +86,7 @@ const Index = () => {
 &nbsp;&nbsp;&nbsp;.3P"%....<br />
 &nbsp;&nbsp;&nbsp;nP"&nbsp;&nbsp;"*MMnx
 			</pre>
-		</div>
+		</div> */}
 		</>
 	)
 
