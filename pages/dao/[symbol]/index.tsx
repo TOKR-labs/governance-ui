@@ -185,6 +185,7 @@ const REALM = () => {
 	const [proposalType2, setProposalType2] = useState<any>([])
 	// const [proposalType3, setProposalType3] = useState<any>([])
 	// const [proposalType4, setProposalType4] = useState<any>([])
+	const [proposalTypeX, setProposalTypeX] = useState<any>([])
 
 	// useEffect(() => {
 	// 	console.log("proposalTypeNA", proposalTypeNA);
@@ -207,6 +208,8 @@ const REALM = () => {
 				if (proposal[1].account?.meta?.type === 2) return proposal
 			})
 		)
+		setProposalTypeX(filteredProposals)
+
 
 		// setProposalTypeNA(filteredProposals);
 
@@ -332,6 +335,26 @@ const REALM = () => {
 										return <ProposalCard key={k} proposalPk={new PublicKey(k)} proposal={v.account} />
 									})}
 								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`escrow-vault`}>
+										Create Vault
+									</NewProposalBtn>
+								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`add-token`}>
+										Add Token To Vault
+									</NewProposalBtn>
+								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`fractionalize`}>
+										Fractionalize
+									</NewProposalBtn>
+								</div>
+								<div className="mr-4">
+									<NewProposalBtn type={`send-share`}>
+										Send Fractional Share
+									</NewProposalBtn>
+								</div>
 
 								{solanaBrowser && connected && proposalType0?.length === 0 && (
 									<NewProposalBtn string={`type=0`} hideIcon basic linkClasses={`text-center text-lg px-4 py-2 inline-flex ${buttonStyles}`}>
@@ -340,7 +363,6 @@ const REALM = () => {
 								)}
 							</div>
 						)}
-
 						{ proposalTypeNA?.length === 0 ? (
 							<></>
 						) : (
