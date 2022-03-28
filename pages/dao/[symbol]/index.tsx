@@ -335,25 +335,27 @@ const REALM = () => {
 										return <ProposalCard key={k} proposalPk={new PublicKey(k)} proposal={v.account} />
 									})}
 								</div>
-								<div className="mr-4">
-									<NewProposalBtn type={`escrow-vault`}>
-										Create Vault
-									</NewProposalBtn>
-								</div>
-								<div className="mr-4">
-									<NewProposalBtn type={`add-token`}>
-										Add Token To Vault
-									</NewProposalBtn>
-								</div>
-								<div className="mr-4">
-									<NewProposalBtn type={`fractionalize`}>
-										Fractionalize
-									</NewProposalBtn>
-								</div>
-								<div className="mr-4">
-									<NewProposalBtn type={`send-share`}>
-										Send Fractional Share
-									</NewProposalBtn>
+								<div className="space-y-4 pt-4">
+									<div className="">
+										<NewProposalBtn type={`escrow-vault`}>
+											Create Vault
+										</NewProposalBtn>
+									</div>
+									<div className="">
+										<NewProposalBtn type={`add-token`}>
+											Add Token To Vault
+										</NewProposalBtn>
+									</div>
+									<div className="">
+										<NewProposalBtn type={`fractionalize`}>
+											Fractionalize
+										</NewProposalBtn>
+									</div>
+									<div className="">
+										<NewProposalBtn type={`send-share`}>
+											Send Fractional Share
+										</NewProposalBtn>
+									</div>
 								</div>
 
 								{solanaBrowser && connected && proposalType0?.length === 0 && (
