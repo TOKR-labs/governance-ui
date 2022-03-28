@@ -92,6 +92,26 @@ export class VaultArgs {
     }],
   ]);
 
+  export class FractionalizeArgs {
+    instruction = 3;
+    number_of_shares: number;
+    constructor(fields: { number_of_shares: number } | undefined = undefined) {
+      if (fields) {
+        this.number_of_shares = fields.number_of_shares;
+      }
+    }
+  }
+  
+  export const FractionalizeSchema = new Map([
+    [FractionalizeArgs, {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['number_of_shares', 'u64'],
+      ]
+    }],
+  ]);
+
 /**
  *
  *
@@ -240,15 +260,15 @@ export async function getVaultInstruction({
   
     console.log("MAX RENT:" + await connection.current.getMinimumBalanceForRentExemption(Vault.MAX_VAULT_SIZE));
   
-    const vaultAuthority = await Vault.getPDA(vaultKey);
+    const vaultMintAuthority = await Vault.getPDA(vaultKey);
   
     const externalPricingAccountKey = (await PublicKey.findProgramAddress([Buffer.from("external"), vaultKey.toBuffer(), wallet!.publicKey!.toBuffer()], TOKR_PROGRAM))[0]
   
     const fractionMintkey = (await PublicKey.findProgramAddress([Buffer.from("fraction"), vaultKey.toBuffer(), wallet!.publicKey!.toBuffer()], TOKR_PROGRAM))[0]
   
-    const redeemTreasuryKey = (await PublicKey.findProgramAddress([vaultAuthority.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), NATIVE_MINT.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID))[0]
+    const redeemTreasuryKey = (await PublicKey.findProgramAddress([vaultMintAuthority.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), NATIVE_MINT.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID))[0]
   
-    const fractionTreasuryKey = (await PublicKey.findProgramAddress([vaultAuthority.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), fractionMintkey.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID))[0]
+    const fractionTreasuryKey = (await PublicKey.findProgramAddress([vaultMintAuthority.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), fractionMintkey.toBuffer()], ASSOCIATED_TOKEN_PROGRAM_ID))[0]
   
     // console.log("vaultKey:", vaultKey.toBase58());
     // console.log("vaultAuthority:", vaultAuthority.toBase58());
@@ -262,8 +282,9 @@ export async function getVaultInstruction({
       {
         keys: [
           { pubkey: wallet!.publicKey!, isSigner: true, isWritable: true },
+          { pubkey: wallet!.publicKey!, isSigner: false, isWritable: true },
           { pubkey: vaultKey, isSigner: false, isWritable: true },
-          { pubkey: vaultAuthority, isSigner: false, isWritable: true },
+          { pubkey: vaultMintAuthority, isSigner: false, isWritable: true },
           { pubkey: externalPricingAccountKey, isSigner: false, isWritable: true },
           { pubkey: fractionMintkey, isSigner: false, isWritable: true },
           { pubkey: redeemTreasuryKey, isSigner: false, isWritable: true },
@@ -342,6 +363,7 @@ export async function getAddTokenInstruction({
           { pubkey: wallet!.publicKey!, isSigner: true, isWritable: true },
           { pubkey: fromAddress, isSigner: false, isWritable: true },
           { pubkey: transferAuthorityKey, isSigner: false, isWritable: true },
+          { pubkey: wallet!.publicKey!, isSigner: false, isWritable: true },
           { pubkey: vaultAddress, isSigner: false, isWritable: true },
           { pubkey: vaultAuthority, isSigner: false, isWritable: true },
           { pubkey: tokenStoreKey, isSigner: false, isWritable: true },
@@ -389,53 +411,47 @@ export async function getAddTokenInstruction({
   currentAccount: GovernedTokenAccount | undefined
   setFormErrors: any
   }): Promise<UiInstruction> {
+
+  const prerequisiteInstructions: TransactionInstruction[] = []
+
   const isValid =  true; // todo: await validateInstruction({ schema, form, setFormErrors })
 
-
-  const vaultMintAuthority = new PublicKey(form.vaultMintAuthority)
   const vaultAddress = new PublicKey(form.vaultAddress)
-  const tokenStoreAddress = new PublicKey(form.tokenStoreAddress)
-
-  let serializedInstruction = ''
-  const prerequisiteInstructions: TransactionInstruction[] = []
-  
   const vault = await metaplex.programs.vault.Vault.load(connection.current, vaultAddress);
 
-  if (vault.data.state == VaultState.Inactive) {
-    console.log("Vault is inactive, add activate instruction");
-    const txData1 = new metaplex.programs.vault.ActivateVault({feePayer: wallet!.publicKey!},
-      {    
-        vault: vault.pubkey,
-        fractionMint: new PublicKey(vault.data.fractionMint),
-        fractionMintAuthority: vaultMintAuthority,
-        fractionTreasury: new PublicKey(vault.data.fractionTreasury),
-        vaultAuthority: new PublicKey(vault.data.authority),
-        numberOfShares: form.numberOfShares
-      }
-    );
-    txData1.instructions.forEach(x => prerequisiteInstructions.push(x))
-    
+  const fractionMint = await connection.current.getAccountInfo(new PublicKey(vault.data.fractionMint))!;
+
+  const rawMint = MintLayout.decode(fractionMint!.data.slice(0, MintLayout.span));
+  if (!rawMint.mintAuthorityOption) {
+    throw new Error("Incorrect Vault Layout")
   }
+  const vaultMintAuthority = new PublicKey(rawMint.mintAuthority);
 
-  // const safetyDepositBoxes = await vault.getSafetyDepositBoxes(connection);
 
-  const txData2 = new metaplex.programs.vault.MintFractionalShares({feePayer: wallet!.publicKey!},
-    {    
-      vault: vault.pubkey,
-      fractionMint: new PublicKey(vault.data.fractionMint),
-      fractionMintAuthority: vaultMintAuthority,
-      fractionTreasury: new PublicKey(vault.data.fractionTreasury),
-      store: tokenStoreAddress,
-      vaultAuthority: new PublicKey(vault.data.authority),
-      numberOfShares: form.numberOfShares
+  const data = Buffer.from(borsh.serialize(
+    FractionalizeSchema,
+    new FractionalizeArgs({ number_of_shares: form.numberOfShares })
+  ));
+
+  const instruction = new TransactionInstruction(
+    {
+      keys: [
+        { pubkey: wallet!.publicKey!, isSigner: true, isWritable: true },
+        { pubkey: wallet!.publicKey!, isSigner: false, isWritable: true },
+        { pubkey: vaultAddress, isSigner: false, isWritable: true },
+        { pubkey: new PublicKey(vaultMintAuthority), isSigner: false, isWritable: true },
+        { pubkey: new PublicKey(vault.data.fractionMint), isSigner: false, isWritable: true },
+        { pubkey: new PublicKey(vault.data.fractionTreasury), isSigner: false, isWritable: true },
+        { pubkey: TOKEN_VAULT_PROGRAM_ID, isSigner: false, isWritable: false },
+        { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      ],
+      programId: TOKR_PROGRAM,
+      data: data
     }
   );
-  
-  
-  // serializedInstruction = serializeInstructionToBase64(txData2.instructions)
 
   const obj: UiInstruction = {
-      serializedInstruction,
+      serializedInstruction: serializeInstructionToBase64(instruction),
       isValid,
       governance: currentAccount?.governance,
       prerequisiteInstructions: prerequisiteInstructions,
