@@ -28,7 +28,7 @@ const SendSharesContract = ({ index, governance, propertyDetails = null, lookupU
 	const [form, setForm] = useState<SendShareForm>({
 		governedAccount: undefined,
 		vaultAddress: '',
-		tokenAddress: '',
+		tokenMint: '',
 		destination: '',
 		numberOfShares: 1
 	})
@@ -108,16 +108,16 @@ const SendSharesContract = ({ index, governance, propertyDetails = null, lookupU
 					error={formErrors['vaultAddress']}
 				/>
                 <Input
-					label="Token Address"
-					value={form.tokenAddress}
+					label="Token Mint"
+					value={form.tokenMint}
 					type="text"
 					onChange={(evt) =>
 					handleSetForm({
 						value: evt.target.value,
-						propertyName: 'tokenAddress',
+						propertyName: 'tokenMint',
 					})
 					}
-					error={formErrors['tokenAddress']}
+					error={formErrors['tokenMint']}
 				/>
 				<Input
 					label="Destination"

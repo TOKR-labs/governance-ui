@@ -29,7 +29,7 @@ const AddTokenToVaultContract = ({ index, governance }: { index: number; governa
 	const shouldBeGoverned = index !== 0 && governance
 	const [form, setForm] = useState<AddTokenToVaultForm>({
 		governedAccount: undefined,
-		tokenAddress: '',
+		tokenMint: '',
         vaultAddress: '',
         fromAddress: ''
 	})
@@ -105,7 +105,7 @@ const AddTokenToVaultContract = ({ index, governance }: { index: number; governa
 					error={formErrors['vaultAddress']}
 				/>
                 <Input
-					label="From Address"
+					label="Token Account Address"
 					value={form.fromAddress}
 					type="text"
 					onChange={(evt) =>
@@ -117,16 +117,16 @@ const AddTokenToVaultContract = ({ index, governance }: { index: number; governa
 					error={formErrors['fromAddress']}
 				/>
 				<Input
-					label="Token Address"
-					value={form.tokenAddress}
+					label="Token Mint Address"
+					value={form.tokenMint}
 					type="text"
 					onChange={(evt) =>
 					handleSetForm({
 						value: evt.target.value,
-						propertyName: 'tokenAddress',
+						propertyName: 'tokenMint',
 					})
 					}
-					error={formErrors['tokenAddress']}
+					error={formErrors['tokenMint']}
 				/>
 			</div>
 			

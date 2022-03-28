@@ -28,8 +28,6 @@ const FractionalizeContract = ({ index, governance, propertyDetails = null, look
 	const [form, setForm] = useState<FractionalizeForm>({
 		governedAccount: undefined,
 		vaultAddress: '',
-		tokenStoreAddress: '',
-		vaultMintAuthority: '',
 		numberOfShares: 1
 	})
 	const [formErrors, setFormErrors] = useState({})
@@ -107,31 +105,6 @@ const FractionalizeContract = ({ index, governance, propertyDetails = null, look
 					}
 					error={formErrors['vaultAddress']}
 				/>
-                <Input
-					label="Token Store Address"
-					value={form.tokenStoreAddress}
-					type="text"
-					onChange={(evt) =>
-					handleSetForm({
-						value: evt.target.value,
-						propertyName: 'tokenStoreAddress',
-					})
-					}
-					error={formErrors['tokenStoreAddress']}
-				/>
-				<Input
-					label="Vault Mint Authority"
-					value={form.vaultMintAuthority}
-					type="text"
-					onChange={(evt) =>
-					handleSetForm({
-						value: evt.target.value,
-						propertyName: 'vaultMintAuthority',
-					})
-					}
-					error={formErrors['vaultMintAuthority']}
-				/>
-
 				<Input
 					label="Number of Shares"
 					value={form.numberOfShares}
