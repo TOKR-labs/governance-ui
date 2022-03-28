@@ -29,8 +29,7 @@ export const DEFAULT_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbg
  */
 export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt'
 
-export const TOKR_DAO = ISDEV ? '2cvLamJnxQRhJuqb3ih9m1jQv3dfszGyXCYU6kGrLYnh' : 'BniPNmX3uG4cV3wuhvUSBrUZtg1x6mmXRHfsjZDyc6Ba'
-// '8ev7GiaQBzdNzGi9NRNhZYoNdKxdMVg2WHLHE9KQx77c' : 'BniPNmX3uG4cV3wuhvUSBrUZtg1x6mmXRHfsjZDyc6Ba' // MainNet Tokr Doa realmId
+export const TOKR_DAO = ISDEV ? '8ev7GiaQBzdNzGi9NRNhZYoNdKxdMVg2WHLHE9KQx77c' : 'BniPNmX3uG4cV3wuhvUSBrUZtg1x6mmXRHfsjZDyc6Ba' // MainNet Tokr Doa realmId
 
 // Well known account names displayed on the instruction card
 export const ACCOUNT_NAMES = {
