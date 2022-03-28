@@ -18,6 +18,8 @@ import { VOTE_STAKE_REGISTRY_INSTRUCTIONS } from './programs/voteStakeRegistry'
 import { MARINADE_INSTRUCTIONS } from './programs/marinade'
 import { SOLEND_PROGRAM_INSTRUCTIONS } from './programs/solend'
 import { ATA_PROGRAM_INSTRUCTIONS } from './programs/associatedTokenAccount'
+
+export const ISDEV = true;
 /**
  * Default governance program id instance
  */
@@ -27,7 +29,7 @@ export const DEFAULT_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbg
  */
 export const DEFAULT_TEST_GOVERNANCE_PROGRAM_ID = 'ToKriDd3YyUxPjbDamXpAZKQMAFMGjhzbgGiGjGbCxt'
 
-export const TOKR_DAO = 'BniPNmX3uG4cV3wuhvUSBrUZtg1x6mmXRHfsjZDyc6Ba' // MainNet Tokr Doa realmId
+export const TOKR_DAO = ISDEV ? '8ev7GiaQBzdNzGi9NRNhZYoNdKxdMVg2WHLHE9KQx77c' : 'BniPNmX3uG4cV3wuhvUSBrUZtg1x6mmXRHfsjZDyc6Ba' // MainNet Tokr Doa realmId
 
 // Well known account names displayed on the instruction card
 export const ACCOUNT_NAMES = {

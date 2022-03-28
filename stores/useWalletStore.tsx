@@ -45,7 +45,7 @@ import {
   getVoteRecordsByVoterMapByProposal,
 } from '@models/api'
 import { accountsToPubkeyMap } from '@tools/sdk/accounts'
-import { HIDDEN_PROPOSALS } from '@components/instructions/tools'
+import { HIDDEN_PROPOSALS, ISDEV } from '@components/instructions/tools'
 
 interface WalletStore extends State {
   connected: boolean
@@ -124,7 +124,7 @@ const INITIAL_PROPOSAL_STATE = {
 
 const useWalletStore = create<WalletStore>((set, get) => ({
   connected: false,
-  connection: getConnectionContext('mainnet'), // MainNet
+  connection: ISDEV ? getConnectionContext('devnet') : getConnectionContext('mainnet'),
 //   connection: getConnectionContext('devnet'),
   current: undefined,
   realms: {},

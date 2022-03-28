@@ -1,11 +1,12 @@
+import { ISDEV } from '@components/instructions/tools'
 import type { EndpointTypes } from '@models/types'
 import { Connection } from '@solana/web3.js'
 import type { EndpointInfo } from '../@types/types'
 
 const ENDPOINTS: EndpointInfo[] = [
 	{
-		name: 'mainnet',
-		url: process.env.MAINNET_RPC || 'https://ssc-dao.genesysgo.net/', // confirm
+		name: ISDEV ? 'devnet' : 'mainnet',
+		url: ISDEV ? (process.env.DEVNET_RPC || 'https://psytrbhymqlkfrhudd.dev.genesysgo.net:8899') : (process.env.MAINNET_RPC || 'https://ssc-dao.genesysgo.net/'), // confirm
 	},
 	{
 		name: 'devnet',

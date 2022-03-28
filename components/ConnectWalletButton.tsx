@@ -12,6 +12,7 @@ import { useRouter } from 'next/router'
 import TwitterIcon from './TwitterIcon'
 import Switch from './Switch'
 import { NavButton } from './Button'
+import { ISDEV } from './instructions/tools'
 
 const StyledWalletProviderLabel = styled.p`
 	font-size: 0.65rem;
@@ -309,7 +310,7 @@ const ConnectWalletButton = (props) => {
 
 	const provider = useMemo(() => getWalletProviderByUrl(providerUrl), [providerUrl])
 
-	const [useDevnet, setUseDevnet] = useState(false) // Update default
+	const [useDevnet, setUseDevnet] = useState( ISDEV || false ) // Update default
 	const router = useRouter()
 	const handleToggleDevnet = () => {
 		// setUseDevnet(!useDevnet)
